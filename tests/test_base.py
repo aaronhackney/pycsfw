@@ -8,7 +8,7 @@ import fmcclient
 class TestBaseClient(TestCase):
     """
     These test run against an actual FMC device.
-    Set your FTP IP, Username and password using bash variables FMCIP, FMCUSER, and FMCPASS
+    Set your FMC IP, Username and password using bash variables FMCIP, FMCUSER, and FMCPASS
     Note: If you want to DISABLE TLS certificate verification, add VERIFY=False to your .env or env varaibles
           If you want to enforce TLS certificate validation just omit VERIFY from your environment variables
     """

@@ -37,13 +37,14 @@ class FMCBaseClient(object):
     def get_auth_token(self):
         self.token = self.parse_auth_headers(self.post("/auth/generatetoken"))
 
-    def get(self, endpoint: str, post_data: dict = None, headers: dict = None) -> dict:
+    def get(self, endpoint: str, post_data: dict = None, headers: dict = None, params: dict = None) -> dict:
         if headers is None:  # Allows us to override obj headers
             headers = self.headers
         r = requests.get(
             self.common_prefix + endpoint,
             headers={"Content-Type": "application/json", "X-auth-access-token": self.token["X-auth-access-token"]},
             verify=self.verify,
+            params=params,
         )
         if r.status_code == 200:
             return r.json()
