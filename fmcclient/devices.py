@@ -24,14 +24,12 @@ class FMCDevices:
             "prohibitPacketTransfer": device_record["prohibitPacketTransfer"],
         }
         log.debug(f"Device Record Update Data: {device_data}")
-        return self.post_put(
+        return self.put(
             f'{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{device_record["id"]}',
-            method="put",
             data=device_data,
         )
 
     def delete_fmc_device_records(self, domain_uuid, device_record):
-        return self.post_put(
+        return self.delete(
             f'{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{device_record["id"]}',
-            method="put",
         )

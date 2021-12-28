@@ -87,12 +87,12 @@ class FMCBaseClient(object):
             return headers
 
     def get_auth_token(self):
-        self.token = self.parse_auth_headers(self.post_put(f"{self.PLATFORM_PREFIX}/auth/generatetoken", auth=True))
+        self.token = self.parse_auth_headers(self.post(f"{self.PLATFORM_PREFIX}/auth/generatetoken", auth=True))
 
     @FMCHTTPWrapper()
     def get(self, endpoint: str, **kwargs) -> dict:
         """
-        Perform an http put or a post using the requests library
+        Perform an http get using the requests library
         :param endpoint: API endpoint to call. Like /api/fmc_platform/v1/domain/{domain_uuid}/devices/devicerecords
         :param headers: HTTP headers, including the auth token
         :param auth: Boolean True for passing basic auth with http req, otherwise omit or False
@@ -109,73 +109,75 @@ class FMCBaseClient(object):
         return r
 
     @FMCHTTPWrapper()
-    def post_put(self, endpoint: str, **kwargs) -> dict:
+    def post(self, endpoint: str, **kwargs) -> dict:
         """
-        Perform an http put or a post using the requests library
+        Perform an http post using the requests library
         :param endpoint: API endpoint to call. Like /api/fmc_platform/v1/domain/{domain_uuid}/devices/devicerecords
-        :param method: make a post (default) or put call
         :param data: dict of the data we wish to put or post
-        :param headers: HTTP headers, including the auth token
+        :param headers: http headers, including the auth token
         :param auth: Boolean True for passing basic auth with http req, otherwise omit or False
         :return: dict
         :rtype: dict
         """
         # kwargs:
-        method = "post" if kwargs.get("method") is None else kwargs.get("method")
         data = kwargs.get("data")
         headers = kwargs.get("headers")
         auth = HTTPBasicAuth(self.username, self.password) if kwargs.get("auth") else None
 
         log.debug(f"Calling endpoint: {self.base_url + endpoint}")
         my_headers = self.set_headers(headers=headers)
-        if method == "post":
-            log.debug(f"Post payload: {data}")
-            r = requests.post(
-                self.base_url + endpoint,
-                headers=my_headers,
-                json=data,
-                auth=auth,
-                verify=self.verify,
-                timeout=self.timeout,
-            )
-        elif method == "put":
-            log.debug(f"Put payload: {data}")
-            r = requests.put(
-                self.base_url + endpoint,
-                headers=my_headers,
-                json=data,
-                verify=self.verify,
-                timeout=self.timeout,
-            )
+        log.debug(f"Post payload: {data}")
+        r = requests.post(
+            self.base_url + endpoint,
+            headers=my_headers,
+            json=data,
+            auth=auth,
+            verify=self.verify,
+            timeout=self.timeout,
+        )
         log.debug(f"HTTP Request Status Code: {r.status_code}")
         return r
 
-    def delete(self, endpoint: str, headers: dict = None) -> dict:
+    @FMCHTTPWrapper()
+    def put(self, endpoint: str, **kwargs) -> dict:
         """
-        Perform an HTTP put or a post using the requests library
+        Perform an http put using the requests library
         :param endpoint: API endpoint to call. Like /api/fmc_platform/v1/domain/{domain_uuid}/devices/devicerecords
-        :param method: make a post (default) or put call
-        :param data: dict of the data we wish to put or post
+        :param data: dict of the data we wish to modify/put
         :param headers: HTTP headers, including the auth token
-        :return: HTTP repsonse dict
+        :param auth: Boolean True for passing basic auth with http req, otherwise omit or False
+        :return: dict
         :rtype: dict
         """
+        # kwargs:
+        data = kwargs.get("data")
+        headers = kwargs.get("headers")
+        auth = HTTPBasicAuth(self.username, self.password) if kwargs.get("auth") else None
+
+        log.debug(f"Calling endpoint: {self.base_url + endpoint}")
         my_headers = self.set_headers(headers=headers)
+        log.debug(f"Put payload: {data}")
+        r = requests.put(
+            self.base_url + endpoint,
+            headers=my_headers,
+            json=data,
+            verify=self.verify,
+            timeout=self.timeout,
+        )
+        log.debug(f"HTTP Request Status Code: {r.status_code}")
+        return r
 
-        try:
-            r = requests.delete(self.base_url + endpoint, headers=headers, verify=self.verify, timeout=self.timeout)
-
-            log.debug(f"Status Code: {r.status_code}")
-            if r.content:
-                payload = loads(r.content.decode("utf-8"))
-            elif r.status_code == 204:
-                return r.headers
-            else:
-                payload = dict()
-            return payload
-        except FileNotFoundError as e:
-            log.error(e)
-            return {"status_code": 500}
+    @FMCHTTPWrapper()
+    def delete(self, endpoint: str, **kwargs) -> dict:
+        """
+        Perform an http delete using the requests library
+        :param endpoint: API endpoint to call. Like /api/fmc_platform/v1/domain/{domain_uuid}/devices/devicerecords
+        :param headers: http headers, including the auth token
+        """
+        headers = kwargs.get("headers")
+        my_headers = self.set_headers(headers=headers)
+        r = requests.delete(self.base_url + endpoint, headers=my_headers, verify=self.verify, timeout=self.timeout)
+        return r
 
     def parse_auth_headers(self, headers: dict):
         return {
