@@ -2,8 +2,6 @@ from unittest import TestCase
 from fmcclient import FMCClient
 from os import environ, getenv
 
-import fmcclient
-
 
 class TestFMCSystem(TestCase):
     """

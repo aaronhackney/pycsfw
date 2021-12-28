@@ -1,11 +1,51 @@
-import requests
 import logging
+import requests
 from json import loads
-from requests import auth
-from requests.api import head
 from requests.auth import HTTPBasicAuth
+from functools import wraps
+from urllib.error import HTTPError
 
 log = logging.getLogger(__name__)
+
+
+class FMCHTTPWrapper(object):
+    """This decorator class wraps all API methods of ths client and solves a number of issues.
+    All http requests are handled by this decorator to catch 401, 404, and other errors.
+    """
+
+    # TODO work out the logic to obtain a new token but watch for race condition
+    def __call__(self, fn):
+        @wraps(fn)
+        def new_func(*args, **kwargs):
+            try:
+                res = fn(*args, **kwargs)
+                if res.status_code == 204:
+                    # HTTP 204 No Content has no body to return. Only return the headers.
+                    return res.headers
+                elif res.status_code == 200:
+                    try:
+                        # Test to see if there is a valid json response.
+                        _res = res.json()
+                    except ValueError:
+                        # Not a json response (could be local file read or non json data)
+                        return res
+                    if "error" in _res and _res["error"]["status"] in (401, 400):
+                        raise HTTPError(res.url, _res["error"]["status"], _res["error"]["message"])
+                return res.json()  # This should be a json response
+            except HTTPError as err:
+                if err.code == 401 or err.code == 400:
+                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - Our token appears to be invalid: {err}")
+                    raise
+                elif err.code == 404:
+                    log.error(
+                        f"FMCHTTPWrapper called by {fn.__name__} - We have called an endpoint path that is invalid: {err}"
+                    )
+                    raise
+                else:
+                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - HTTP Error returned: {err}")
+                    raise
+
+        return new_func
 
 
 class FMCBaseClient(object):
@@ -13,6 +53,9 @@ class FMCBaseClient(object):
     This class is inherited by all FMC API classes and is always instantiated and is where the auth token for the FMC
     is obtained and other functions that are needed by multiple inherited classes
     """
+
+    PLATFORM_PREFIX = f"/api/fmc_platform/v1"
+    CONFIG_PREFIX = f"/api/fmc_config/v1"
 
     def __init__(
         self,
@@ -23,50 +66,110 @@ class FMCBaseClient(object):
         fmc_port: str = None,
         timeout: int = 30,
     ):
-        self.fdm_port = str(fmc_port) if fmc_port else None
+        self.fmc_port = str(fmc_port) if fmc_port else None
         self.base_url = f"https://{fmc_ip}:{self.fmc_port}" if fmc_port else f"https://{fmc_ip}"
         self.verify = verify  # allow API self-signed certs * DANGER *
-        self.common_prefix = f"{self.base_url}/api/fmc_platform/v1"
-        self.verify = verify
         self.timeout = timeout
         self.username = username
         self.password = password
-        self.headers = None
         self.token = None
 
-    def get_auth_token(self):
-        self.token = self.parse_auth_headers(self.post("/auth/generatetoken"))
-
-    def get(self, endpoint: str, post_data: dict = None, headers: dict = None, params: dict = None) -> dict:
-        if headers is None:  # Allows us to override obj headers
-            headers = self.headers
-        r = requests.get(
-            self.common_prefix + endpoint,
-            headers={"Content-Type": "application/json", "X-auth-access-token": self.token["X-auth-access-token"]},
-            verify=self.verify,
-            params=params,
-        )
-        if r.status_code == 200:
-            return r.json()
+    def set_headers(self, headers=None):
+        if headers is None:
+            if self.token is not None:
+                return {
+                    "Content-Type": "application/json",
+                    "X-auth-access-token": self.token.get("X-auth-access-token"),
+                }
+            else:
+                return {"Content-Type": "application/json"}
         else:
-            log.error(f"API call failed with status code:{r.status_code}")
+            return headers
 
-    def post(self, endpoint: str, post_data: dict = None, headers: dict = None) -> dict:
-        if headers is None:  # Allows us to override headers
-            headers = self.headers
-        try:
-            response = requests.post(
-                self.common_prefix + endpoint,
-                headers={"Content-Type": "application/json"},
-                json=post_data,
-                auth=HTTPBasicAuth(self.username, self.password),
+    def get_auth_token(self):
+        self.token = self.parse_auth_headers(self.post_put(f"{self.PLATFORM_PREFIX}/auth/generatetoken", auth=True))
+
+    @FMCHTTPWrapper()
+    def get(self, endpoint: str, **kwargs) -> dict:
+        """
+        Perform an http put or a post using the requests library
+        :param endpoint: API endpoint to call. Like /api/fmc_platform/v1/domain/{domain_uuid}/devices/devicerecords
+        :param headers: HTTP headers, including the auth token
+        :param auth: Boolean True for passing basic auth with http req, otherwise omit or False
+        :return: dict
+        :rtype: dict
+        """
+        # data: dict = None, headers: dict = None, params: dict = None
+        # kwargs:
+        headers = kwargs.get("headers")
+        auth = HTTPBasicAuth(self.username, self.password) if kwargs.get("auth") else None
+        params = kwargs.get("params")
+        my_headers = self.set_headers(headers=headers)
+        r = requests.get(self.base_url + endpoint, headers=my_headers, verify=self.verify, params=params, auth=auth)
+        return r
+
+    @FMCHTTPWrapper()
+    def post_put(self, endpoint: str, **kwargs) -> dict:
+        """
+        Perform an http put or a post using the requests library
+        :param endpoint: API endpoint to call. Like /api/fmc_platform/v1/domain/{domain_uuid}/devices/devicerecords
+        :param method: make a post (default) or put call
+        :param data: dict of the data we wish to put or post
+        :param headers: HTTP headers, including the auth token
+        :param auth: Boolean True for passing basic auth with http req, otherwise omit or False
+        :return: dict
+        :rtype: dict
+        """
+        # kwargs:
+        method = "post" if kwargs.get("method") is None else kwargs.get("method")
+        data = kwargs.get("data")
+        headers = kwargs.get("headers")
+        auth = HTTPBasicAuth(self.username, self.password) if kwargs.get("auth") else None
+
+        log.debug(f"Calling endpoint: {self.base_url + endpoint}")
+        my_headers = self.set_headers(headers=headers)
+        if method == "post":
+            log.debug(f"Post payload: {data}")
+            r = requests.post(
+                self.base_url + endpoint,
+                headers=my_headers,
+                json=data,
+                auth=auth,
                 verify=self.verify,
                 timeout=self.timeout,
             )
-            if response.content:
-                payload = loads(response.content.decode("utf-8"))
-            elif response.status_code == 204:
-                return response.headers
+        elif method == "put":
+            log.debug(f"Put payload: {data}")
+            r = requests.put(
+                self.base_url + endpoint,
+                headers=my_headers,
+                json=data,
+                verify=self.verify,
+                timeout=self.timeout,
+            )
+        log.debug(f"HTTP Request Status Code: {r.status_code}")
+        return r
+
+    def delete(self, endpoint: str, headers: dict = None) -> dict:
+        """
+        Perform an HTTP put or a post using the requests library
+        :param endpoint: API endpoint to call. Like /api/fmc_platform/v1/domain/{domain_uuid}/devices/devicerecords
+        :param method: make a post (default) or put call
+        :param data: dict of the data we wish to put or post
+        :param headers: HTTP headers, including the auth token
+        :return: HTTP repsonse dict
+        :rtype: dict
+        """
+        my_headers = self.set_headers(headers=headers)
+
+        try:
+            r = requests.delete(self.base_url + endpoint, headers=headers, verify=self.verify, timeout=self.timeout)
+
+            log.debug(f"Status Code: {r.status_code}")
+            if r.content:
+                payload = loads(r.content.decode("utf-8"))
+            elif r.status_code == 204:
+                return r.headers
             else:
                 payload = dict()
             return payload
@@ -82,5 +185,5 @@ class FMCBaseClient(object):
             "DOMAIN_ID": headers.get("DOMAIN_ID"),
             "DOMAIN_UUID": headers.get("DOMAIN_UUID"),
             "global": headers.get("global"),
-            "DOMAINS": headers.get("DOMAINS"),
+            "DOMAINS": loads(headers.get("DOMAINS")),
         }
