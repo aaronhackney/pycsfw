@@ -3,7 +3,9 @@ import requests
 from json import loads
 from requests.auth import HTTPBasicAuth
 from functools import wraps
-from urllib.error import HTTPError
+
+# from urllib.error import HTTPError
+from requests.exceptions import HTTPError
 
 log = logging.getLogger(__name__)
 
@@ -19,6 +21,7 @@ class FMCHTTPWrapper(object):
         def new_func(*args, **kwargs):
             try:
                 res = fn(*args, **kwargs)
+                log.debug(f"Returned http status code:{res.status_code}")
                 if res.status_code == 204:
                     # HTTP 204 No Content has no body to return. Only return the headers.
                     return res.headers
@@ -29,17 +32,32 @@ class FMCHTTPWrapper(object):
                     except ValueError:
                         # Not a json response (could be local file read or non json data)
                         return res
-                    if "error" in _res and _res["error"]["status"] in (401, 400):
-                        raise HTTPError(res.url, _res["error"]["status"], _res["error"]["message"])
+                elif res.status_code == 422:
+                    res.raise_for_status()
+                # if "error" in _res and _res["error"]["status"] in (401, 400):
+                #     raise HTTPError(res.url, _res["error"]["status"], _res["error"]["message"])
+                elif res.status_code == 400:
+                    res.raise_for_status()
+                else:
+                    res.raise_for_status()
                 return res.json()  # This should be a json response
             except HTTPError as err:
-                if err.code == 401 or err.code == 400:
+                if res.status_code == 400:
+                    log.error(
+                        f"FMCHTTPWrapper called by {fn.__name__} - This could be that the object already exists: {err}"
+                    )
+                    raise
+                if res.status_code == 401 or res.status_code == 400:
                     log.error(f"FMCHTTPWrapper called by {fn.__name__} - Our token appears to be invalid: {err}")
                     raise
-                elif err.code == 404:
+                elif res.status_code == 404:
                     log.error(
                         f"FMCHTTPWrapper called by {fn.__name__} - We have called an endpoint path that is invalid: {err}"
                     )
+                    raise
+                elif res.status_code == 422:
+                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - We have provided invalid input: {err}")
+                    log.error(res.text)
                     raise
                 else:
                     log.error(f"FMCHTTPWrapper called by {fn.__name__} - HTTP Error returned: {err}")
@@ -122,6 +140,7 @@ class FMCBaseClient(object):
         # kwargs:
         data = kwargs.get("data")
         headers = kwargs.get("headers")
+        params = kwargs.get("params")
         auth = HTTPBasicAuth(self.username, self.password) if kwargs.get("auth") else None
 
         log.debug(f"Calling endpoint: {self.base_url + endpoint}")
@@ -134,6 +153,7 @@ class FMCBaseClient(object):
             auth=auth,
             verify=self.verify,
             timeout=self.timeout,
+            params=params,
         )
         log.debug(f"HTTP Request Status Code: {r.status_code}")
         return r
@@ -152,7 +172,6 @@ class FMCBaseClient(object):
         # kwargs:
         data = kwargs.get("data")
         headers = kwargs.get("headers")
-        auth = HTTPBasicAuth(self.username, self.password) if kwargs.get("auth") else None
 
         log.debug(f"Calling endpoint: {self.base_url + endpoint}")
         my_headers = self.set_headers(headers=headers)

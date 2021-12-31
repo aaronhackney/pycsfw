@@ -10,6 +10,9 @@ log = logging.getLogger()
 log.setLevel(logging.DEBUG)
 log.addHandler(logging.StreamHandler())
 
+TEST_DOMAIN = "Global/Customer A"
+ACCESS_CONTROL_POLICY = "Default Policy"
+
 
 class TestFMCDevices(TestCase):
     """
@@ -58,3 +61,29 @@ class TestFMCDevices(TestCase):
         updated_device["name"] = original_name
         reverted_device = self.fmc_client.update_fmc_device_records(domain_uuid, updated_device)
         self.assertEqual(original_name, reverted_device["name"])
+
+    def test_create_device_record(self):
+        # domain_list
+        domain_list = self.fmc_client.get_fmc_domain_list()
+        # Get access-control-policy to apply to new device
+        # my_domain = self.fmc_client.token["DOMAINS"][0]["uuid"]
+        my_domain = domain_list[1]["uuid"]
+        log.debug(f"domain uuid:{my_domain}")
+        acp = None
+        acp_list = self.fmc_client.get_fmc_acp_list(my_domain)
+        for acpolicy in acp_list:
+            if acpolicy["name"] == ACCESS_CONTROL_POLICY:
+                acp = acpolicy
+
+        new_device = self.fmc_client.create_fmc_device_record(
+            my_domain,
+            "test-ftd",
+            "192.168.1.100",
+            "abc123",
+            ["BASE", "THREAT"],
+            acp=acp["id"],
+            description="Test device",
+        )
+        # Get a list of devices after the create operation...
+        device_list = self.fmc_client.get_fmc_device_records_list(my_domain)
+        self.assertIsNotNone(new_device)

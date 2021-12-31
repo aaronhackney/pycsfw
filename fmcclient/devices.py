@@ -15,6 +15,28 @@ class FMCDevices:
     def get_fmc_device_records(self, domain_uuid, object_id):
         return self.get(f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{object_id}")
 
+    def create_fmc_device_record(self, domain_uuid, name, host, reg_key, license_caps, **kwargs):
+        nat_id = kwargs.get("nat_id")
+        acp = kwargs.get("acp")
+        perf_tier = kwargs.get("perf_tier")
+        device_group = kwargs.get("group")
+        description = kwargs.get("description")
+        # "deviceGroup": device_group,
+        # "description": description,
+        # "natID": nat_id,
+        # "performanceTier": perf_tier,
+
+        device_data = {
+            "name": name,
+            "hostName": host,
+            "regKey": reg_key,
+            "accessPolicy": acp,
+            "license_caps": license_caps,
+            "accessPolicy": {"id": acp, "type": "AccessPolicy"},
+            "type": "Device",
+        }
+        return self.post(f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords", data=device_data)
+
     def update_fmc_device_records(self, domain_uuid, device_record):
         device_data = {
             "id": device_record["id"],
