@@ -32,11 +32,14 @@ class TestFMCDevices(TestCase):
         self.fmc_client = FMCClient(self.ftd_ip, self.username, self.password, verify=self.verify)
         self.fmc_client.get_auth_token()
         self.assertIsNotNone(self.fmc_client.token)
+        self.domain_uuid = self.fmc_client.token["DOMAINS"][0]["uuid"]
+        self.devices = self.fmc_client.get_fmc_device_records_list(self.domain_uuid)
 
     def tearDown(self):
         pass
 
     def test_get_fmc_device_records_list(self):
+        test = self.fmc_client.get_fmc_device_records_list(self.fmc_client.token["DOMAINS"][0]["uuid"])
         self.assertIsNotNone(self.fmc_client.get_fmc_device_records_list(self.fmc_client.token["DOMAINS"][0]["uuid"]))
 
     def test_get_fmc_device_records(self):
@@ -63,6 +66,7 @@ class TestFMCDevices(TestCase):
         self.assertEqual(original_name, reverted_device["name"])
 
     def test_create_device_record(self):
+        # Creates a device but device will not populate until a live device connects with these parameters
         # domain_list
         domain_list = self.fmc_client.get_fmc_domain_list()
         # Get access-control-policy to apply to new device
@@ -87,3 +91,22 @@ class TestFMCDevices(TestCase):
         # Get a list of devices after the create operation...
         device_list = self.fmc_client.get_fmc_device_records_list(my_domain)
         self.assertIsNotNone(new_device)
+
+    def test_get_device_phys_interface_list(self):
+        domain_uuid = self.fmc_client.token["DOMAINS"][0]["uuid"]
+        devices = self.fmc_client.get_fmc_device_records_list(domain_uuid)
+        self.assertIsNotNone(self.fmc_client.get_ftd_device_physical_interfaces_list(domain_uuid, devices[0]["id"]))
+
+    def test_get_device_pys_interface(self):
+        domain_uuid = self.fmc_client.token["DOMAINS"][0]["uuid"]
+        devices = self.fmc_client.get_fmc_device_records_list(domain_uuid)
+        interfaces = self.fmc_client.get_ftd_device_physical_interfaces_list(domain_uuid, devices[0]["id"])
+        self.assertIsNotNone(
+            self.fmc_client.get_ftd_device_physical_interface(
+                domain_uuid, container_uuid=devices[0]["id"], intf_id=interfaces[0]["id"]
+            )
+        )
+
+    def test_get_vlan_interfaces(self):
+        test = self.fmc_client.get_ftd_device_vlan_interface_list(self.domain_uuid, self.devices[0]["id"])
+        print()

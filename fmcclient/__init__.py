@@ -7,11 +7,14 @@ from .devices import FMCDevices
 from .acp import FMCAccessPolicies
 from .net_objects import FMCNetworkObjects
 from .variables import FMCVariableSets
+from .chassis import FMCManagedChassis
 
 log = logging.getLogger(__name__)
 
 
-class FMCClient(FMCBaseClient, FMCSystem, FMCDevices, FMCAccessPolicies, FMCNetworkObjects, FMCVariableSets):
+class FMCClient(
+    FMCBaseClient, FMCSystem, FMCDevices, FMCAccessPolicies, FMCNetworkObjects, FMCVariableSets, FMCManagedChassis
+):
     def __init__(
         self, ftd_ip: str, username: str, password: str, verify: bool = True, timeout: int = 30, fmc_port=None
     ):

@@ -55,3 +55,27 @@ class FMCDevices:
         return self.delete(
             f'{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{device_record["id"]}',
         )
+
+    def get_ftd_device_physical_interfaces_list(self, domain_uuid, container_uuid, expanded=True, offset=0, limit=999):
+        return self.get(
+            f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{container_uuid}/physicalinterfaces",
+            params={"offset": offset, "limit": limit, "expanded": expanded},
+        )["items"]
+
+    def get_ftd_device_physical_interface(self, domain_uuid, container_uuid, intf_id):
+        return self.get(
+            f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{container_uuid}/physicalinterfaces/{intf_id}",
+        )
+
+    def get_ftd_device_vlan_interface_list(self, domain_uuid, container_uuid, expanded=True, offset=0, limit=999):
+        # /api/fmc_config/v1/domain/{domainUUID}/devices/devicerecords/{containerUUID}/vlaninterfaces/{objectId}
+        vlan_ifaces = self.get(
+            f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{container_uuid}/vlaninterfaces",
+            params={"offset": offset, "limit": limit, "expanded": expanded},
+        )
+        return vlan_ifaces.get("items")
+
+    def get_ftd_device_vlan_interface(self, domain_uuid, container_uuid, intf_id):
+        return self.get(
+            f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{container_uuid}/vlaninterfaces/{intf_id}",
+        )

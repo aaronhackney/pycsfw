@@ -3,7 +3,7 @@ from fmcclient import FMCClient
 from os import environ, getenv
 
 
-class TestFMCSystem(TestCase):
+class TestFMCManagedChassis(TestCase):
     """
     These test run against an actual FMC device.
     Set your FMC IP, Username and password using bash variables FMCIP, FMCUSER, and FMCPASS
@@ -23,8 +23,5 @@ class TestFMCSystem(TestCase):
     def tearDown(self):
         pass
 
-    def test_get_domain_list(self):
-        self.assertIsNotNone(self.fmc_client.get_fmc_domain_list())
-
-    def test_get_fmc_version_list(self):
-        self.assertIsNotNone(self.fmc_client.get_fmc_version_list())
+    def test_get_managed_chassis_list(self):
+        test = self.fmc_client.get_fmc_managed_chassis_list(self.fmc_client.token["DOMAINS"][0]["uuid"])

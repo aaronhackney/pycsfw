@@ -46,6 +46,7 @@ class FMCHTTPWrapper(object):
                     log.error(
                         f"FMCHTTPWrapper called by {fn.__name__} - This could be that the object already exists: {err}"
                     )
+                    log.error(err.response.text)
                     raise
                 if res.status_code == 401 or res.status_code == 400:
                     log.error(f"FMCHTTPWrapper called by {fn.__name__} - Our token appears to be invalid: {err}")
@@ -55,9 +56,13 @@ class FMCHTTPWrapper(object):
                         f"FMCHTTPWrapper called by {fn.__name__} - We have called an endpoint path that is invalid: {err}"
                     )
                     raise
+                elif res.status_code == 405:
+                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - Unsupported: {err}")
+                    log.error(err.response.text)
+                    raise
                 elif res.status_code == 422:
                     log.error(f"FMCHTTPWrapper called by {fn.__name__} - We have provided invalid input: {err}")
-                    log.error(res.text)
+                    log.error(err.response.text)
                     raise
                 else:
                     log.error(f"FMCHTTPWrapper called by {fn.__name__} - HTTP Error returned: {err}")
