@@ -43,9 +43,7 @@ class FMCHTTPWrapper(object):
                 return res.json()  # This should be a json response
             except HTTPError as err:
                 if res.status_code == 400:
-                    log.error(
-                        f"FMCHTTPWrapper called by {fn.__name__} - This could be that the object already exists: {err}"
-                    )
+                    log.error(f"FMCHTTPWrapper called by method {fn.__name__} - {err}")
                     log.error(err.response.text)
                     raise
                 if res.status_code == 401 or res.status_code == 400:
