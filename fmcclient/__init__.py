@@ -10,7 +10,6 @@ from .variables import FMCVariableSets
 from .chassis import FMCManagedChassis
 from .interfaces import FMCInterfaces
 
-
 log = logging.getLogger(__name__)
 
 

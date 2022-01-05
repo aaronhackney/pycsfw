@@ -2,6 +2,7 @@ from os import environ, getenv
 from json import loads
 from unittest import TestCase
 from fmcclient import FMCClient
+from fmcclient.models import FTDPhysicalInterface, FTDSubInterface, FTDInterfaceIPv4
 import logging
 import pprint
 
@@ -30,6 +31,23 @@ SUB_IFACE_CONFIG = {
     "type": "SubInterface",
     "vlanId": 123,
 }
+
+SUB_IFACE_CONFIG2 = FTDSubInterface(
+    ifname="test-sub-1",
+    name="GigabitEthernet0/2",
+    subIntfId=123,
+    vlanId=123,
+    ipv4=FTDInterfaceIPv4(static={"address": "192.168.4.4", "netmask": "24"}),
+)
+
+PHYSICAL_IFACE_CONFIG = FTDPhysicalInterface(
+    name="GigabitEthernet0/3",
+    ifname="test-dmz",
+    enabled="True",
+    ipv4=FTDInterfaceIPv4(static={"address": "192.168.4.4", "netmask": "24"}),
+)
+
+# TODO: Subinterface model changes....
 
 
 class TestFMCInterfaces(TestCase):
@@ -73,13 +91,13 @@ class TestFMCInterfaces(TestCase):
                 if subif["subIntfId"] == subif_id:
                     return subif
 
-    def test_get__physical_interface_list(self):
+    def test_get_physical_interface_list(self):
         self.assertIsNotNone(self.fmc_client.get_ftd_physical_interfaces_list(self.domain_uuid, self.device["id"]))
 
-    def test_get_device_pys_interface(self):
+    def test_get_device_phys_interface(self):
         interfaces = self.fmc_client.get_ftd_physical_interfaces_list(self.domain_uuid, self.device["id"])
         self.assertIsNotNone(
-            self.fmc_client.get_ftd_physical_interface(self.domain_uuid, self.device["id"], interfaces[0]["id"])
+            self.fmc_client.get_ftd_physical_interface(self.domain_uuid, self.device["id"], interfaces[0].id)
         )
 
     def test_get_vlan_interfaces(self):
