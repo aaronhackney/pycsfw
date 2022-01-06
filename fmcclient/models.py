@@ -5,7 +5,51 @@ from ipaddress import IPv4Address
 
 import pydantic
 
-# TODO: Model "devices"
+# TODO: Model accessPolicy healthPolicy token
+
+
+class FMCDomain(BaseModel):
+    uuid: str
+    name: str
+    type: str = "Domain"
+
+
+class FMCServerVersion(BaseModel):
+    serverVersion: Optional[str]
+    vdbVersion: Optional[str]
+    lspVersion: Optional[str]
+    name: Optional[str]
+    description: Optional[str]
+    geoVersion: Optional[str]
+    id: Optional[str]
+    sruVersion: Optional[str]
+    type: str = "ServerVersion"
+
+
+class FTDDevice(BaseModel):
+    id: str = None
+    name: Optional[str]
+    links: Optional[dict]
+    description: Optional[str]
+    model: Optional[str]
+    modelId: Optional[str]
+    modelNumber: Optional[str]
+    modelType: Optional[str]
+    healthStatus: Optional[str]
+    sw_version: Optional[str]
+    healthPolicy: Optional[dict]
+    accessPolicy: Optional[dict]
+    advanced: Optional[dict]
+    hostName: Optional[str]
+    license_caps: Optional[list]
+    keepLocalEvents: Optional[bool]
+    prohibitPacketTransfer: Optional[bool]
+    ftdMode: Optional[str]
+    snortEngine: Optional[str]
+    natID: Optional[str]
+    regKey: Optional[str]
+    metadata: Optional[dict]
+    type: str = "device"
 
 
 class FTDInterfaceIPv4(BaseModel):
@@ -48,6 +92,7 @@ class FTDInterface(BaseModel):
     mode: str = "NONE"
     enableSGTPropagate: bool = False
     managementOnly: bool = False
+    metadata: Optional[dict]
 
 
 class FTDPhysicalInterface(FTDInterface):

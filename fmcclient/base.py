@@ -42,12 +42,20 @@ class FMCHTTPWrapper(object):
                     res.raise_for_status()
                 return res.json()  # This should be a json response
             except HTTPError as err:
+                # TODO: Catch "Duplicate Logical Name" and contine....
+                #
                 if res.status_code == 400:
                     log.error(f"FMCHTTPWrapper called by method {fn.__name__} - {err}")
                     log.error(err.response.text)
+                    err_msg = loads(err.response.text)
+                    for msg in err_msg["error"]["messages"]:
+                        if msg.get("description").find("Duplicate Logical Name") > -1:
+                            log.error("Duplicate name found. Skipping this object but not raising an error...")
+                            return
                     raise
                 if res.status_code == 401 or res.status_code == 400:
                     log.error(f"FMCHTTPWrapper called by {fn.__name__} - Our token appears to be invalid: {err}")
+                    log.error(err.response.text)
                     raise
                 elif res.status_code == 404:
                     log.error(
