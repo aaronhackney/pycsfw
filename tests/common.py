@@ -27,6 +27,21 @@ PHYSICAL_IFACE_CONFIG = FTDPhysicalInterface(
     ipv4=FTDInterfaceIPv4(static={"address": "192.168.4.4", "netmask": "24"}),
 )
 
+NET_OBJ_1 = {
+    "name": "test1",
+    "value": "192.168.1.0/24",
+    "overridable": False,
+    "description": "Test Network obj 1",
+    "type": "Network",
+}
+NET_OBJ_2 = {
+    "name": "test2",
+    "value": "192.168.2.0/24",
+    "overridable": False,
+    "description": "Test Network obj 2",
+    "type": "Network",
+}
+
 
 class TestCommon(TestCase):
     """

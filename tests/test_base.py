@@ -1,24 +1,15 @@
-from unittest import TestCase
+import common
 from fmcclient import FMCClient
-from os import environ, getenv
+
+import logging
+
+log = logging.getLogger()
+log.setLevel(common.LOG_LEVEL)
+log.addHandler(logging.StreamHandler())
 
 
-class TestBaseClient(TestCase):
-    """
-    These test run against an actual FMC device.
-    Set your FMC IP, Username and password using bash variables FMCIP, FMCUSER, and FMCPASS
-    Note: If you want to DISABLE TLS certificate verification, add VERIFY=False to your .env or env varaibles
-          If you want to enforce TLS certificate validation just omit VERIFY from your environment variables
-    """
-
-    def setUp(self):
-        self.verify = getenv("VERIFY", "True").lower() in ("false", "0", "f")
-        self.ftd_ip = environ.get("FMCIP")
-        self.username = environ.get("FMCUSER")
-        self.password = environ.get("FMCPASS")
-
-    def tearDown(self):
-        pass
+class TestBaseClient(common.TestCommon):
+    """See the common.py for the def setUp(self) method"""
 
     def test_client_instance(self):
         fmc_client = FMCClient(self.ftd_ip, self.username, self.password, verify=self.verify)

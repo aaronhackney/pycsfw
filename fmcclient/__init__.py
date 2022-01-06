@@ -4,7 +4,7 @@ import logging
 from .base import FMCBaseClient
 from .system import FMCSystem
 from .devices import FMCDevices
-from .acp import FMCAccessPolicies
+from .ap import FTDAccessPolicies
 from .net_objects import FMCNetworkObjects
 from .variables import FMCVariableSets
 from .chassis import FMCManagedChassis
@@ -17,7 +17,7 @@ class FMCClient(
     FMCBaseClient,
     FMCSystem,
     FMCDevices,
-    FMCAccessPolicies,
+    FTDAccessPolicies,
     FMCNetworkObjects,
     FMCVariableSets,
     FMCManagedChassis,

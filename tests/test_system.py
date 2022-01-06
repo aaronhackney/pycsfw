@@ -1,6 +1,5 @@
 import logging
 import common
-from tests.common import LOG_LEVEL
 
 log = logging.getLogger()
 log.setLevel(common.LOG_LEVEL)

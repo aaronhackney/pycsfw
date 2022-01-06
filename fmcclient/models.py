@@ -1,11 +1,68 @@
-from dataclasses import dataclass, field, asdict
 from pydantic import BaseModel
-from typing import Optional, Dict, Union
-from ipaddress import IPv4Address
+from typing import Optional
 
-import pydantic
+# TODO: healthPolicy token
+class FTDAccessRules(BaseModel):
+    id: str
+    name: str
+    action: str
+    enabled: bool
+    enableSyslog: Optional[bool]
+    vlanTags: Optional[dict] = {}
+    sourceZones: Optional[dict] = {}
+    destinationZones: Optional[dict] = {}
+    sourceNetworks: Optional[dict] = {}
+    destinationNetworks: Optional[dict] = {}
+    sourcePorts: Optional[dict]
+    destinationPorts: Optional[dict] = {}
+    logBegin: Optional[bool]
+    logEnd: Optional[bool]
+    variableSet: Optional[dict] = {}
+    logFiles: Optional[bool]
+    sourceDynamicObjects: Optional[dict] = {}
+    destinationDynamicObjects: Optional[dict] = {}
+    sendEventsToFMC: Optional[bool]
+    ipsPolicy: Optional[dict]
+    timeRangeObjects: Optional[list]
+    originalSourceNetworks: Optional[dict]
+    urls: Optional[dict]
+    applications: Optional[list]
+    metadata: Optional[dict]
+    links: Optional[dict]
+    type: str = "AccessRule"
 
-# TODO: Model accessPolicy healthPolicy token
+
+class FTDSecurityIntelPolicy(BaseModel):
+    id: str
+    links: dict
+    type: str = "SecurityIntelligencePolicy"
+
+
+class FTDAccessPolicyDefaultAction(BaseModel):
+    id: str
+    action: str
+    logBegin: bool
+    logEnd: bool
+    sendEventsToFMC: bool
+    type: str = "AccessPolicyDefaultAction"
+
+
+class FTDPrefilterPolicy(BaseModel):
+    id: str
+    name: str
+    type: str = "PrefilterPolicy"
+
+
+class FTDAccessPolicy(BaseModel):
+    id: str = None
+    name: Optional[str]
+    links: Optional[dict]
+    metadata: Optional[dict]
+    rules: Optional[dict]
+    securityIntelligence: Optional[FTDSecurityIntelPolicy]
+    defaultAction: Optional[FTDAccessPolicyDefaultAction]
+    prefilterPolicySetting: Optional[FTDPrefilterPolicy]
+    type: str = "AccessPolicy"
 
 
 class FMCDomain(BaseModel):

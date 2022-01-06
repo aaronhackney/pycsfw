@@ -1,7 +1,3 @@
-from os import environ, getenv
-from json import loads
-from unittest import TestCase
-from fmcclient import FMCClient
 from fmcclient.models import FTDDevice
 import common
 
@@ -48,7 +44,7 @@ class TestFMCDevices(common.TestCommon):
         # domain_list = self.fmc_client.get_fmc_domain_list()
         # my_domain = domain_list[1]["uuid"]
         acp = None
-        acp_list = self.fmc_client.get_fmc_acp_list(self.domain_uuid)
+        acp_list = self.fmc_client.get_ftd_ap_list(self.domain_uuid)
         for acpolicy in acp_list:
             if acpolicy["name"] == common.ACCESS_CONTROL_POLICY:
                 acp = acpolicy
