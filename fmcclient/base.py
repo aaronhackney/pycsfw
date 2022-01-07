@@ -54,7 +54,7 @@ class FMCHTTPWrapper(object):
                             return
                     raise
                 if res.status_code == 401 or res.status_code == 400:
-                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - Our token appears to be invalid: {err}")
+                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - {err}")
                     log.error(err.response.text)
                     raise
                 elif res.status_code == 404:

@@ -1,13 +1,37 @@
 from pydantic import BaseModel
 from typing import Optional
+from enum import Enum
+
+
+class Action(str, Enum):
+    ALLOW = "ALLOW"
+    TRUST = "TRUST"
+    BLOCK = "BLOCK"
+    MONITOR = "MONITOR"
+    BLOCK_RESET = "BLOCK_RESET"
+    BLOCK_INTERACTIVE = "BLOCK_INTERACTIVE"
+    BLOCK_RESET_INTERACTIVE = "BLOCK_RESET_INTERACTIVE"
+
+
+class SyslogSeverity(str, Enum):
+    ALERT = "ALERT"
+    CRIT = "CRIT"
+    DEBUG = "DEBUG"
+    EMERG = "EMERG"
+    ERR = "ERR"
+    INFO = "INFO"
+    NOTICE = "NOTICE"
+    WARNING = "WARNING"
+
 
 # TODO: healthPolicy token
-class FTDAccessRules(BaseModel):
-    id: str
-    name: str
-    action: str
-    enabled: bool
+class FTDAccessRule(BaseModel):
+    id: Optional[str]
+    name: Optional[str]
+    action: Action
+    enabled: Optional[bool]
     enableSyslog: Optional[bool]
+    syslogSeverity: Optional[SyslogSeverity]
     vlanTags: Optional[dict] = {}
     sourceZones: Optional[dict] = {}
     destinationZones: Optional[dict] = {}
@@ -33,28 +57,37 @@ class FTDAccessRules(BaseModel):
 
 
 class FTDSecurityIntelPolicy(BaseModel):
-    id: str
-    links: dict
+    id: Optional[str]
+    links: Optional[dict]
     type: str = "SecurityIntelligencePolicy"
 
 
 class FTDAccessPolicyDefaultAction(BaseModel):
-    id: str
-    action: str
-    logBegin: bool
-    logEnd: bool
-    sendEventsToFMC: bool
+    id: Optional[str]
+    action: Optional[str]
+    defaultAction: Optional[dict]
+    snmpConfig: Optional[dict]
+    intrusionPolicy: Optional[dict]
+    description: Optional[str]
+    variableSet: Optional[dict]
+    version: Optional[str]
+    syslogConfig: Optional[dict]
+    name: Optional[str]
+    links: Optional[dict]
+    logBegin: Optional[bool]
+    logEnd: Optional[bool]
+    sendEventsToFMC: Optional[bool]
     type: str = "AccessPolicyDefaultAction"
 
 
 class FTDPrefilterPolicy(BaseModel):
-    id: str
-    name: str
+    id: Optional[str]
+    name: Optional[str]
     type: str = "PrefilterPolicy"
 
 
 class FTDAccessPolicy(BaseModel):
-    id: str = None
+    id: Optional[str]
     name: Optional[str]
     links: Optional[dict]
     metadata: Optional[dict]
@@ -62,6 +95,9 @@ class FTDAccessPolicy(BaseModel):
     securityIntelligence: Optional[FTDSecurityIntelPolicy]
     defaultAction: Optional[FTDAccessPolicyDefaultAction]
     prefilterPolicySetting: Optional[FTDPrefilterPolicy]
+    identityPolicySetting: Optional[dict]
+    description: Optional[str]
+    version: Optional[str]
     type: str = "AccessPolicy"
 
 
@@ -84,7 +120,7 @@ class FMCServerVersion(BaseModel):
 
 
 class FTDDevice(BaseModel):
-    id: str = None
+    id: str = Optional[str]
     name: Optional[str]
     links: Optional[dict]
     description: Optional[str]
@@ -95,7 +131,7 @@ class FTDDevice(BaseModel):
     healthStatus: Optional[str]
     sw_version: Optional[str]
     healthPolicy: Optional[dict]
-    accessPolicy: Optional[dict]
+    accessPolicy: Optional[FTDAccessPolicy]
     advanced: Optional[dict]
     hostName: Optional[str]
     license_caps: Optional[list]
@@ -161,3 +197,12 @@ class FTDSubInterface(FTDInterface):
     subIntfId: int
     vlanId: int
     type: str = "SubInterface"
+
+
+class FMCVariableSet(BaseModel):
+    id: Optional[str]
+    name: Optional[str]
+    description: Optional[str]
+    links: Optional[dict]
+    metadata: Optional[dict]
+    type: str = "VariableSet"

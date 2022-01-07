@@ -1,4 +1,4 @@
-from fmcclient.models import FTDPhysicalInterface, FTDSubInterface, FTDInterfaceIPv4
+from fmcclient.models import FTDPhysicalInterface, FTDSubInterface, FTDInterfaceIPv4, FTDAccessPolicy, FTDDevice
 from unittest import TestCase
 import logging
 from os import environ, getenv
@@ -10,7 +10,7 @@ LOG_LEVEL = logging.DEBUG
 # Test parameters
 TEST_DOMAIN = "Global/Customer A"
 TEST_DEVICE_NAME = "FTD-7.1.0-90-A"
-ACCESS_CONTROL_POLICY = "Default Policy"
+DEFAULT_ACCESS_CONTROL_POLICY = "Default Policy"
 
 SUB_IFACE_CONFIG = FTDSubInterface(
     name="GigabitEthernet0/4",
@@ -42,6 +42,28 @@ NET_OBJ_2 = {
     "type": "Network",
 }
 
+TEST_ACCESS_POLICY = FTDAccessPolicy(
+    **{
+        "type": "AccessPolicy",
+        "name": "UnitTest-Access-Policy",
+        "defaultAction": {
+            "action": "BLOCK",
+            "logBegin": False,
+            "logEnd": False,
+            "sendEventsToFMC": False,
+            "type": "AccessPolicyDefaultAction",
+        },
+    }
+)
+
+TEST_DEVICE = FTDDevice(
+    name="test-ftd",
+    hostName="192.168.1.100",
+    regKey="abc123",
+    license_caps=["BASE", "THREAT"],
+    description="Test device",
+)
+
 
 class TestCommon(TestCase):
     """
@@ -52,7 +74,7 @@ class TestCommon(TestCase):
           If you want to enforce TLS certificate validation just omit VERIFY from your environment variables
     """
 
-    def setUp(self):
+    def common_setup(self):
         self.verify = getenv("VERIFY", "True").lower() in ("false", "0", "f")
         self.ftd_ip = environ.get("FMCIP")
         self.username = environ.get("FMCUSER")
@@ -62,9 +84,6 @@ class TestCommon(TestCase):
         self.assertIsNotNone(self.fmc_client.token)
         self.domain_uuid = self.get_domain_uuid()
         self.device = self.get_test_device(self.fmc_client.get_fmc_device_records_list(self.domain_uuid))
-
-    def tearDown(self):
-        pass
 
     def get_domain_uuid(self):
         for domain in self.fmc_client.token["DOMAINS"]:

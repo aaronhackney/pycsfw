@@ -7,20 +7,21 @@ log.setLevel(common.LOG_LEVEL)
 log.addHandler(logging.StreamHandler())
 
 
-class TestFMCDevices(common.TestCommon):
-    """See the common.py for the def setUp(self) method"""
+class TestFMCNetworkObjects(common.TestCommon):
+    """See the common.py for common methods and constants"""
+
+    def setUp(self):
+        """Create the FMCClient instance and other common setup tasks"""
+        self.common_setup()
 
     def test_get_fmc_network_object_list(self):
         self.assertIsNotNone(self.fmc_client.get_network_objects_list(self.domain_uuid))
 
     def test_get_fmc_network_objects_list_filter(self):
-        network_object_list = self.fmc_client.get_network_objects_list(self.domain_uuid, filter="nameOrValue:test")
-        passed = False
-        for net_obj in network_object_list:
-            if net_obj["name"] == "IPv4-Benchmark-Tests":
-                self.assertEquals(net_obj["name"], "IPv4-Benchmark-Tests")
-                passed = True
-        self.assertTrue(passed)
+        network_object_list = self.fmc_client.get_network_objects_list(
+            self.domain_uuid, filter="nameOrValue:IPv4-Benchmark-Tests"
+        )
+        self.assertIsInstance(network_object_list[0], dict)
 
     def test_get_fmc_network_object(self):
         objects = self.fmc_client.get_network_objects_list(self.domain_uuid)

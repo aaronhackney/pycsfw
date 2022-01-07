@@ -9,7 +9,11 @@ log.addHandler(logging.StreamHandler())
 
 
 class TestFMCDevices(common.TestCommon):
-    """See the common.py for the def setUp(self) method"""
+    """See the common.py for common methods and constants"""
+
+    def setUp(self):
+        """Create the FMCClient instance and other common setup tasks"""
+        self.common_setup()
 
     def test_get_fmc_device_records_list(self):
         """Test getting a list of devices managed by this FMC"""
@@ -41,20 +45,6 @@ class TestFMCDevices(common.TestCommon):
     def test_create_device_record(self):
         """Test creating a new device record"""
         # Readies the FMC to onboard a new device but device will not populate until a live device connects with these parameters
-        # domain_list = self.fmc_client.get_fmc_domain_list()
-        # my_domain = domain_list[1]["uuid"]
-        acp = None
-        acp_list = self.fmc_client.get_ftd_ap_list(self.domain_uuid)
-        for acpolicy in acp_list:
-            if acpolicy["name"] == common.ACCESS_CONTROL_POLICY:
-                acp = acpolicy
-
-        ftd_device = FTDDevice(
-            name="test-ftd",
-            hostName="192.168.1.100",
-            regKey="abc123",
-            license_caps=["BASE", "THREAT"],
-            accessPolicy=acp,
-            description="Test device",
-        )
-        self.assertIsNotNone(self.fmc_client.create_fmc_device_record(self.domain_uuid, ftd_device))
+        acp = self.fmc_client.get_access_policy_list(self.domain_uuid, name="Default Policy", expanded=False)[0]
+        common.TEST_DEVICE.accessPolicy = acp
+        self.assertIsNotNone(self.fmc_client.create_fmc_device_record(self.domain_uuid, common.TEST_DEVICE))

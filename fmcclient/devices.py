@@ -55,8 +55,6 @@ class FMCDevices:
         :rtype: FTDDevice
         """
         ftd_device.metadata = None
-        log.debug(f"Device Record Update Data: {ftd_device}")
-        test = ftd_device.dict(exclude_unset=True)
         return FTDDevice(
             **self.put(
                 f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{ftd_device.id}",
