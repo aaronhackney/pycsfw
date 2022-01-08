@@ -1,5 +1,5 @@
 import logging
-from fmcclient.models import FTDDevice
+from fmcclient.models import FTDDeviceModel
 
 log = logging.getLogger(__name__)
 
@@ -17,37 +17,39 @@ class FMCDevices:
         :rtype: list
         """
         return [
-            FTDDevice(**device)
+            FTDDeviceModel(**device)
             for device in self.get(
                 f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords",
                 params={"offset": offset, "limit": limit, "expanded": expanded},
             )["items"]
         ]
 
-    def get_fmc_device_record(self, domain_uuid: str, object_id: str) -> FTDDevice:
+    def get_fmc_device_record(self, domain_uuid: str, object_id: str) -> FTDDeviceModel:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param object_id: the id of the device to retrieve
         :return: FTDDevice object (see models.py) managed by this fmc
         :rtype: FTDDevice
         """
-        return FTDDevice(**self.get(f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{object_id}"))
+        return FTDDeviceModel(
+            **self.get(f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{object_id}")
+        )
 
-    def create_fmc_device_record(self, domain_uuid: str, ftd_device: str) -> FTDDevice:
+    def create_fmc_device_record(self, domain_uuid: str, ftd_device: str) -> FTDDeviceModel:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param ftd_device: FTDDevice object (see models.py) that we wish to add to this fmc
         :return: FTDDevice object (see models.py) created on this fmc
         :rtype: FTDDevice
         """
-        return FTDDevice(
+        return FTDDeviceModel(
             **self.post(
                 f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords",
                 data=ftd_device.dict(exclude_unset=True),
             )
         )
 
-    def update_fmc_device_record(self, domain_uuid: str, ftd_device: str) -> FTDDevice:
+    def update_fmc_device_record(self, domain_uuid: str, ftd_device: str) -> FTDDeviceModel:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param ftd_device: FTDDevice object (see models.py) that we wish to modify on this fmc
@@ -55,14 +57,14 @@ class FMCDevices:
         :rtype: FTDDevice
         """
         ftd_device.metadata = None
-        return FTDDevice(
+        return FTDDeviceModel(
             **self.put(
                 f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{ftd_device.id}",
                 data=ftd_device.dict(exclude_unset=True),
             )
         )
 
-    def delete_fmc_device_record(self, domain_uuid: str, object_id: str) -> FTDDevice:
+    def delete_fmc_device_record(self, domain_uuid: str, object_id: str) -> FTDDeviceModel:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param object_id: the id of the device to delete
@@ -73,4 +75,4 @@ class FMCDevices:
             f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{object_id.id}",
         )
         if deleted_device is not None:
-            return FTDDevice(**deleted_device)
+            return FTDDeviceModel(**deleted_device)

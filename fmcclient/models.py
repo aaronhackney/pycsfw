@@ -3,7 +3,7 @@ from typing import Optional
 from enum import Enum
 
 
-class Action(str, Enum):
+class ActionModel(str, Enum):
     ALLOW = "ALLOW"
     TRUST = "TRUST"
     BLOCK = "BLOCK"
@@ -24,11 +24,27 @@ class SyslogSeverity(str, Enum):
     WARNING = "WARNING"
 
 
-# TODO: healthPolicy token
-class FTDAccessRule(BaseModel):
+class ZoneInterfaceModes(str, Enum):
+    PASSIVE = "PASSIVE"
+    INLINE = "INLINE"
+    SWITCHED = "SWITCHED"
+    ROUTED = "ROUTED"
+    ASA = "ASA"
+
+
+class InterfaceMode(str, Enum):
+    INLINE = "INLINE"
+    PASSIVE = "PASSIVE"
+    TAP = "TAP"
+    ERSPAN = "ERSPAN"
+    NONE = "NONE"
+    SWITCHPORT = "SWITCHPORT"
+
+
+class FTDAccessRuleModel(BaseModel):
     id: Optional[str]
     name: Optional[str]
-    action: Action
+    action: ActionModel
     enabled: Optional[bool]
     enableSyslog: Optional[bool]
     syslogSeverity: Optional[SyslogSeverity]
@@ -56,13 +72,13 @@ class FTDAccessRule(BaseModel):
     type: str = "AccessRule"
 
 
-class FTDSecurityIntelPolicy(BaseModel):
+class FTDSecurityIntelPolicyModel(BaseModel):
     id: Optional[str]
     links: Optional[dict]
     type: str = "SecurityIntelligencePolicy"
 
 
-class FTDAccessPolicyDefaultAction(BaseModel):
+class FTDAccessPolicyDefaultActionModel(BaseModel):
     id: Optional[str]
     action: Optional[str]
     defaultAction: Optional[dict]
@@ -80,34 +96,34 @@ class FTDAccessPolicyDefaultAction(BaseModel):
     type: str = "AccessPolicyDefaultAction"
 
 
-class FTDPrefilterPolicy(BaseModel):
+class FTDPrefilterPolicyModel(BaseModel):
     id: Optional[str]
     name: Optional[str]
     type: str = "PrefilterPolicy"
 
 
-class FTDAccessPolicy(BaseModel):
+class FTDAccessPolicyModel(BaseModel):
     id: Optional[str]
     name: Optional[str]
     links: Optional[dict]
     metadata: Optional[dict]
     rules: Optional[dict]
-    securityIntelligence: Optional[FTDSecurityIntelPolicy]
-    defaultAction: Optional[FTDAccessPolicyDefaultAction]
-    prefilterPolicySetting: Optional[FTDPrefilterPolicy]
+    securityIntelligence: Optional[FTDSecurityIntelPolicyModel]
+    defaultAction: Optional[FTDAccessPolicyDefaultActionModel]
+    prefilterPolicySetting: Optional[FTDPrefilterPolicyModel]
     identityPolicySetting: Optional[dict]
     description: Optional[str]
     version: Optional[str]
     type: str = "AccessPolicy"
 
 
-class FMCDomain(BaseModel):
+class FMCDomainModel(BaseModel):
     uuid: str
     name: str
     type: str = "Domain"
 
 
-class FMCServerVersion(BaseModel):
+class FMCServerVersionModel(BaseModel):
     serverVersion: Optional[str]
     vdbVersion: Optional[str]
     lspVersion: Optional[str]
@@ -119,7 +135,7 @@ class FMCServerVersion(BaseModel):
     type: str = "ServerVersion"
 
 
-class FTDDevice(BaseModel):
+class FTDDeviceModel(BaseModel):
     id: str = Optional[str]
     name: Optional[str]
     links: Optional[dict]
@@ -131,7 +147,7 @@ class FTDDevice(BaseModel):
     healthStatus: Optional[str]
     sw_version: Optional[str]
     healthPolicy: Optional[dict]
-    accessPolicy: Optional[FTDAccessPolicy]
+    accessPolicy: Optional[FTDAccessPolicyModel]
     advanced: Optional[dict]
     hostName: Optional[str]
     license_caps: Optional[list]
@@ -145,18 +161,23 @@ class FTDDevice(BaseModel):
     type: str = "device"
 
 
-class FTDInterfaceIPv4(BaseModel):
+class FTDInterfaceIPv4Model(BaseModel):
     # 'ipv4': {'static': {'address': '192.168.22.1', 'netmask': '24'}},
     static: Optional[dict]
     dhcp: dict = {"enableDefaultRouteDHCP": True, "dhcpRouteMetric": 1}
 
 
-class FTDSecurityZone(BaseModel):
-    id: str = ""
+class FTDSecurityZoneModel(BaseModel):
+    id: Optional[str] = ""
+    name: Optional[str]
+    metadata: Optional[dict]
+    links: Optional[dict]
+    interfaces: Optional[list]
+    interfaceMode: Optional[ZoneInterfaceModes]
     type: str = "SecurityZone"
 
 
-class FTDInterfaceIPv6(BaseModel):
+class FTDInterfaceIPv6Model(BaseModel):
     enableIPV6: bool = False
     enableRA: bool = True
     enforceEUI64: bool = False
@@ -170,36 +191,37 @@ class FTDInterfaceIPv6(BaseModel):
     raInterval: int = 200
 
 
-class FTDInterface(BaseModel):
+class FTDInterfaceModel(BaseModel):
     name: str
     ifname: Optional[str]
-    ipv4: Optional[FTDInterfaceIPv4]
-    ipv6: Optional[FTDInterfaceIPv6]
+    ipv4: Optional[FTDInterfaceIPv4Model]
+    ipv6: Optional[FTDInterfaceIPv6Model]
     enableAntiSpoofing: Optional[bool]
     fragmentReassembly: Optional[bool]
-    securityZone: Optional[FTDSecurityZone]
+    securityZone: Optional[FTDSecurityZoneModel]
     enabled: bool = True
     id: str = None
     MTU: int = 1500
     priority: int = 0
-    mode: str = "NONE"
+    mode: InterfaceMode = InterfaceMode.INLINE
     enableSGTPropagate: bool = False
     managementOnly: bool = False
     metadata: Optional[dict]
+    links: Optional[dict]
 
 
-class FTDPhysicalInterface(FTDInterface):
+class FTDPhysicalInterfaceModel(FTDInterfaceModel):
     type: str = "PhysicalInterface"
     hardware: dict = {"speed": "AUTO", "duplex": "AUTO"}
 
 
-class FTDSubInterface(FTDInterface):
+class FTDSubInterfaceModel(FTDInterfaceModel):
     subIntfId: int
     vlanId: int
     type: str = "SubInterface"
 
 
-class FMCVariableSet(BaseModel):
+class FMCVariableSetModel(BaseModel):
     id: Optional[str]
     name: Optional[str]
     description: Optional[str]

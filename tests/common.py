@@ -1,4 +1,11 @@
-from fmcclient.models import FTDPhysicalInterface, FTDSubInterface, FTDInterfaceIPv4, FTDAccessPolicy, FTDDevice
+from fmcclient.models import (
+    FTDPhysicalInterfaceModel,
+    FTDSubInterfaceModel,
+    FTDInterfaceIPv4Model,
+    FTDAccessPolicyModel,
+    FTDDeviceModel,
+    FTDSecurityZoneModel,
+)
 from unittest import TestCase
 import logging
 from os import environ, getenv
@@ -12,19 +19,19 @@ TEST_DOMAIN = "Global/Customer A"
 TEST_DEVICE_NAME = "FTD-7.1.0-90-A"
 DEFAULT_ACCESS_CONTROL_POLICY = "Default Policy"
 
-SUB_IFACE_CONFIG = FTDSubInterface(
+SUB_IFACE_CONFIG = FTDSubInterfaceModel(
     name="GigabitEthernet0/4",
     ifname="test-sub-1",
     subIntfId=987,
     vlanId=987,
-    ipv4=FTDInterfaceIPv4(static={"address": "192.168.40.40", "netmask": "24"}),
+    ipv4=FTDInterfaceIPv4Model(static={"address": "192.168.40.40", "netmask": "24"}),
 )
 
-PHYSICAL_IFACE_CONFIG = FTDPhysicalInterface(
+PHYSICAL_IFACE_CONFIG = FTDPhysicalInterfaceModel(
     name="GigabitEthernet0/4",
     ifname="test-dmz",
     enabled="True",
-    ipv4=FTDInterfaceIPv4(static={"address": "192.168.4.4", "netmask": "24"}),
+    ipv4=FTDInterfaceIPv4Model(static={"address": "192.168.4.4", "netmask": "24"}),
 )
 
 NET_OBJ_1 = {
@@ -42,7 +49,7 @@ NET_OBJ_2 = {
     "type": "Network",
 }
 
-TEST_ACCESS_POLICY = FTDAccessPolicy(
+TEST_ACCESS_POLICY = FTDAccessPolicyModel(
     **{
         "type": "AccessPolicy",
         "name": "UnitTest-Access-Policy",
@@ -56,7 +63,7 @@ TEST_ACCESS_POLICY = FTDAccessPolicy(
     }
 )
 
-TEST_DEVICE = FTDDevice(
+TEST_DEVICE = FTDDeviceModel(
     name="test-ftd",
     hostName="192.168.1.100",
     regKey="abc123",

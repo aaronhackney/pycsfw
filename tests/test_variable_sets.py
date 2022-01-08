@@ -2,7 +2,7 @@ import common
 
 import logging
 
-from fmcclient.models import FMCVariableSet
+from fmcclient.models import FMCVariableSetModel
 
 log = logging.getLogger()
 log.setLevel(common.LOG_LEVEL)
@@ -26,4 +26,4 @@ class TestFMCVariableSets(common.TestCommon):
         variable_sets = self.fmc_client.get_fmc_variable_set_list(self.domain_uuid)
         default_var_set_list = list(filter(lambda x: "Default-Set" == x.name, variable_sets))
         default_var_set = self.fmc_client.get_fmc_variable_set(self.domain_uuid, default_var_set_list[0].id)
-        self.assertIsInstance(default_var_set, FMCVariableSet)
+        self.assertIsInstance(default_var_set, FMCVariableSetModel)

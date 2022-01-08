@@ -3,7 +3,7 @@ import common
 import logging
 from fmcclient import ap
 
-from fmcclient.models import Action, FTDAccessPolicy, FTDAccessRule
+from fmcclient.models import ActionModel, FTDAccessPolicyModel, FTDAccessRuleModel
 
 log = logging.getLogger()
 log.setLevel(common.LOG_LEVEL)
@@ -38,7 +38,7 @@ class TestFMCAccessPolicies(common.TestCommon):
     def test_get_ftd_access_policy(self):
         """Test the policy container get operation"""
         policy_list = self.fmc_client.get_access_policy_list(self.domain_uuid)
-        self.assertIsInstance(policy_list[0], FTDAccessPolicy)
+        self.assertIsInstance(policy_list[0], FTDAccessPolicyModel)
 
     def test_update_access_policy(self):
         """
@@ -48,7 +48,7 @@ class TestFMCAccessPolicies(common.TestCommon):
         test_ftd_ap = self.fmc_client.get_access_policy(self.domain_uuid, self.ftd_ap.id)
         test_ftd_ap.name = f"updated-{self.ftd_ap.name}"
         updated_ftd_ap = self.fmc_client.update_access_policy(self.domain_uuid, test_ftd_ap)
-        self.assertIsInstance(updated_ftd_ap, FTDAccessPolicy)
+        self.assertIsInstance(updated_ftd_ap, FTDAccessPolicyModel)
         self.assertNotEquals(updated_ftd_ap.name, self.ftd_ap.name)
 
     def test_get_ftd_access_rules_list(self):
@@ -64,24 +64,24 @@ class TestFMCAccessPolicies(common.TestCommon):
     def test_get_ftd_access_rule(self):
         """Test the read operation for FTDAccessRule"""
         access_rule_obj = self.fmc_client.create_access_rule(
-            self.domain_uuid, self.ftd_ap.id, FTDAccessRule(name="Test-1", enabled=True, action=Action.ALLOW)
+            self.domain_uuid, self.ftd_ap.id, FTDAccessRuleModel(name="Test-1", enabled=True, action=ActionModel.ALLOW)
         )
         self.assertIsInstance(
-            self.fmc_client.get_access_rule(self.domain_uuid, self.ftd_ap.id, access_rule_obj.id), FTDAccessRule
+            self.fmc_client.get_access_rule(self.domain_uuid, self.ftd_ap.id, access_rule_obj.id), FTDAccessRuleModel
         )
 
     def test_create_ftd_access_rule(self):
         """Test the create operation for FTDAccessRules"""
-        new_rule = FTDAccessRule(name="Test-1", enabled=True, action=Action.ALLOW)
+        new_rule = FTDAccessRuleModel(name="Test-1", enabled=True, action=ActionModel.ALLOW)
         self.assertIsInstance(
-            self.fmc_client.create_access_rule(self.domain_uuid, self.ftd_ap.id, new_rule), FTDAccessRule
+            self.fmc_client.create_access_rule(self.domain_uuid, self.ftd_ap.id, new_rule), FTDAccessRuleModel
         )
 
     def test_delete_ftd_access_rule(self):
         """Test the delete operation for FTDAccessRules"""
         access_rule_obj = self.fmc_client.create_access_rule(
-            self.domain_uuid, self.ftd_ap.id, FTDAccessRule(name="Test-1", enabled=True, action=Action.ALLOW)
+            self.domain_uuid, self.ftd_ap.id, FTDAccessRuleModel(name="Test-1", enabled=True, action=ActionModel.ALLOW)
         )
         self.assertIsInstance(
-            self.fmc_client.delete_access_rule(self.domain_uuid, self.ftd_ap.id, access_rule_obj.id), FTDAccessRule
+            self.fmc_client.delete_access_rule(self.domain_uuid, self.ftd_ap.id, access_rule_obj.id), FTDAccessRuleModel
         )

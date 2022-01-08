@@ -1,4 +1,4 @@
-from fmcclient.models import FTDDevice
+from fmcclient.models import FTDDeviceModel
 import common
 
 import logging

@@ -1,6 +1,6 @@
 import logging
 import common
-from fmcclient.models import FTDPhysicalInterface, FTDSubInterface
+from fmcclient.models import FTDPhysicalInterfaceModel, FTDSubInterfaceModel
 
 log = logging.getLogger()
 log.setLevel(common.LOG_LEVEL)
@@ -36,7 +36,7 @@ class TestFMCInterfaces(common.TestCommon):
         interfaces = self.fmc_client.get_ftd_physical_iface_list(self.domain_uuid, self.device.id)
         self.assertIsInstance(
             self.fmc_client.get_ftd_physical_iface(self.domain_uuid, self.device.id, interfaces[0].id),
-            FTDPhysicalInterface,
+            FTDPhysicalInterfaceModel,
         )
 
     def test_update_phys_interface(self):
@@ -46,7 +46,7 @@ class TestFMCInterfaces(common.TestCommon):
         iface.ifname = f"test-dmz"
         iface.ipv4 = common.PHYSICAL_IFACE_CONFIG.ipv4
         updated_iface = self.fmc_client.update_ftd_physical_iface(self.domain_uuid, self.device.id, iface)
-        self.assertIsInstance(updated_iface, FTDPhysicalInterface)
+        self.assertIsInstance(updated_iface, FTDPhysicalInterfaceModel)
         self.assertEquals(updated_iface.ipv4.static, iface.ipv4.static)
 
     def test_get_vlan_interfaces_list(self):
@@ -69,7 +69,7 @@ class TestFMCInterfaces(common.TestCommon):
         self.sub_interface = self.fmc_client.create_ftd_subiface(
             self.domain_uuid, self.device.id, common.SUB_IFACE_CONFIG
         )
-        self.assertIsInstance(self.sub_iface, FTDSubInterface)
+        self.assertIsInstance(self.sub_iface, FTDSubInterfaceModel)
 
     def test_update_subinterface(self):
         """Test updating a subinterface"""
@@ -81,5 +81,5 @@ class TestFMCInterfaces(common.TestCommon):
     def test_delete_subinterface(self):
         """Test deleting a subinterface"""
         deleted_iface = self.fmc_client.delete_ftd_subiface(self.domain_uuid, self.device.id, self.sub_interface.id)
-        self.assertIsInstance(deleted_iface, FTDSubInterface)
+        self.assertIsInstance(deleted_iface, FTDSubInterfaceModel)
         self.sub_interface = None

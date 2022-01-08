@@ -1,6 +1,6 @@
 import logging
 from fmcclient import variables
-from fmcclient.models import FTDAccessPolicy, FTDAccessRule
+from fmcclient.models import FTDAccessPolicyModel, FTDAccessRuleModel
 
 log = logging.getLogger(__name__)
 
@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 class FTDAccessPolicies:
     def get_access_policy_list(
         self, domain_uuid: str, name: str = None, expanded: bool = True, offset: int = 0, limit: int = 999
-    ) -> list[FTDAccessPolicy]:
+    ) -> list[FTDAccessPolicyModel]:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param name: Filter the results with this policy name
@@ -24,9 +24,9 @@ class FTDAccessPolicies:
         )
         if "items" in policy_list:
             [print(access_policy) for access_policy in policy_list["items"]]
-            return [FTDAccessPolicy(**access_policy) for access_policy in policy_list["items"]]
+            return [FTDAccessPolicyModel(**access_policy) for access_policy in policy_list["items"]]
 
-    def get_access_policy(self, domain_uuid: str, object_id: str) -> FTDAccessPolicy:
+    def get_access_policy(self, domain_uuid: str, object_id: str) -> FTDAccessPolicyModel:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param object_id: the id of the FTDAccessPolicy to retrieve
@@ -35,9 +35,9 @@ class FTDAccessPolicies:
         """
         access_policy = self.get(f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/policy/accesspolicies/{object_id}")
         if access_policy is not None:
-            return FTDAccessPolicy(**access_policy)
+            return FTDAccessPolicyModel(**access_policy)
 
-    def create_access_policy(self, domain_uuid: str, ap_obj: FTDAccessPolicy) -> FTDAccessPolicy:
+    def create_access_policy(self, domain_uuid: str, ap_obj: FTDAccessPolicyModel) -> FTDAccessPolicyModel:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param ap_obj: the FTDAccessPolicy object to create
@@ -49,9 +49,9 @@ class FTDAccessPolicies:
             data=ap_obj.dict(exclude_unset=True),
         )
         if access_policy is not None:
-            return FTDAccessPolicy(**access_policy)
+            return FTDAccessPolicyModel(**access_policy)
 
-    def update_access_policy(self, domain_uuid: str, ap_obj: FTDAccessPolicy) -> FTDAccessPolicy:
+    def update_access_policy(self, domain_uuid: str, ap_obj: FTDAccessPolicyModel) -> FTDAccessPolicyModel:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param ap_obj: the FTDAccessPolicy object to modify
@@ -67,9 +67,9 @@ class FTDAccessPolicies:
             data=ap_obj.dict(exclude_unset=True),
         )
         if access_policy is not None:
-            return FTDAccessPolicy(**access_policy)
+            return FTDAccessPolicyModel(**access_policy)
 
-    def delete_access_policy(self, domain_uuid: str, object_id: str) -> FTDAccessPolicy:
+    def delete_access_policy(self, domain_uuid: str, object_id: str) -> FTDAccessPolicyModel:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param object_id: the id of the FTDAccessPolicy to delete
@@ -80,11 +80,11 @@ class FTDAccessPolicies:
             f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/policy/accesspolicies/{object_id}"
         )
         if deleted_access_policy is not None:
-            return FTDAccessPolicy(**deleted_access_policy)
+            return FTDAccessPolicyModel(**deleted_access_policy)
 
     def get_access_rule_list(
         self, domain_uuid: str, ap_uuid: str, expanded: bool = True, offset: int = 0, limit: int = 999
-    ) -> list[FTDAccessRule]:
+    ) -> list[FTDAccessRuleModel]:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param ap_uuid: The UUID of the FTDAccessPolicy that contains these rules. The "parent container"
@@ -99,9 +99,9 @@ class FTDAccessPolicies:
             params={"offset": offset, "limit": limit, "expanded": expanded},
         )
         if "items" in rules_list:
-            return [FTDAccessRule(**access_rules) for access_rules in rules_list["items"]]
+            return [FTDAccessRuleModel(**access_rules) for access_rules in rules_list["items"]]
 
-    def get_access_rule(self, domain_uuid: str, ap_uuid: str, rule_id: str) -> FTDAccessPolicy:
+    def get_access_rule(self, domain_uuid: str, ap_uuid: str, rule_id: str) -> FTDAccessPolicyModel:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param ap_uuid: The UUID of the FTDAccessPolicy that contains these rules. The "parent container"
@@ -113,18 +113,18 @@ class FTDAccessPolicies:
             f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/policy/accesspolicies/{ap_uuid}/accessrules/{rule_id}"
         )
         if rule is not None:
-            return FTDAccessRule(**rule)
+            return FTDAccessRuleModel(**rule)
 
     def create_access_rule(
         self,
         domain_uuid: str,
         ap_uuid: str,
-        rule_obj: FTDAccessRule,
+        rule_obj: FTDAccessRuleModel,
         insert_after: str = None,
         insert_before: str = None,
         section: str = None,
         category: str = None,
-    ) -> FTDAccessRule:
+    ) -> FTDAccessRuleModel:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param ap_uuid: The UUID of the FTDAccessPolicy that contains these rules. The "parent container"
@@ -149,12 +149,12 @@ class FTDAccessPolicies:
             },
         )
         if access_rule is not None:
-            return FTDAccessRule(**access_rule)
+            return FTDAccessRuleModel(**access_rule)
 
     def update_access_rule(self):
         pass
 
-    def delete_access_rule(self, domain_uuid: str, ap_uuid: str, rule_id: str) -> FTDAccessPolicy:
+    def delete_access_rule(self, domain_uuid: str, ap_uuid: str, rule_id: str) -> FTDAccessPolicyModel:
         """
         :param domain_uuid: the FMC uuid of the domain
         :param ap_uuid: The UUID of the FTDAccessPolicy that contains these rules. The "parent container"
@@ -166,7 +166,7 @@ class FTDAccessPolicies:
             f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/policy/accesspolicies/{ap_uuid}/accessrules/{rule_id}"
         )
         if rule is not None:
-            return FTDAccessRule(**rule)
+            return FTDAccessRuleModel(**rule)
 
 
 # TODO: create/update/delete for rules
