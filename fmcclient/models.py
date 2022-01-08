@@ -3,7 +3,7 @@ from typing import Optional
 from enum import Enum
 
 
-class ActionModel(str, Enum):
+class Action(str, Enum):
     ALLOW = "ALLOW"
     TRUST = "TRUST"
     BLOCK = "BLOCK"
@@ -44,7 +44,7 @@ class InterfaceMode(str, Enum):
 class FTDAccessRuleModel(BaseModel):
     id: Optional[str]
     name: Optional[str]
-    action: ActionModel
+    action: Action
     enabled: Optional[bool]
     enableSyslog: Optional[bool]
     syslogSeverity: Optional[SyslogSeverity]
@@ -167,13 +167,11 @@ class FTDInterfaceIPv4Model(BaseModel):
     dhcp: dict = {"enableDefaultRouteDHCP": True, "dhcpRouteMetric": 1}
 
 
-class FTDSecurityZoneModel(BaseModel):
-    id: Optional[str] = ""
+class FTDInterfaceSecurityZoneModel(BaseModel):
+    id: str = ""
     name: Optional[str]
     metadata: Optional[dict]
     links: Optional[dict]
-    interfaces: Optional[list]
-    interfaceMode: Optional[ZoneInterfaceModes]
     type: str = "SecurityZone"
 
 
@@ -198,12 +196,12 @@ class FTDInterfaceModel(BaseModel):
     ipv6: Optional[FTDInterfaceIPv6Model]
     enableAntiSpoofing: Optional[bool]
     fragmentReassembly: Optional[bool]
-    securityZone: Optional[FTDSecurityZoneModel]
+    securityZone: Optional[FTDInterfaceSecurityZoneModel]
     enabled: bool = True
     id: str = None
     MTU: int = 1500
     priority: int = 0
-    mode: InterfaceMode = InterfaceMode.INLINE
+    mode: InterfaceMode = InterfaceMode.NONE
     enableSGTPropagate: bool = False
     managementOnly: bool = False
     metadata: Optional[dict]
@@ -216,9 +214,18 @@ class FTDPhysicalInterfaceModel(FTDInterfaceModel):
 
 
 class FTDSubInterfaceModel(FTDInterfaceModel):
-    subIntfId: int
-    vlanId: int
+    subIntfId: Optional[int]
+    vlanId: Optional[int]
     type: str = "SubInterface"
+
+
+class FTDSecurityZoneModel(FTDInterfaceSecurityZoneModel):
+    """Chicken and the egg problem. Interface objects need a zone model and a zone needs an interface model.
+    By breaking the zone module up into two inheritioed classes, we can solve both interface model needs and
+    the Zone model needs. Order is important here."""
+
+    interfaces: Optional[list[FTDInterfaceModel]]
+    interfaceMode: Optional[ZoneInterfaceModes]
 
 
 class FMCVariableSetModel(BaseModel):

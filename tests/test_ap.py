@@ -3,7 +3,7 @@ import common
 import logging
 from fmcclient import ap
 
-from fmcclient.models import ActionModel, FTDAccessPolicyModel, FTDAccessRuleModel
+from fmcclient.models import Action, FTDAccessPolicyModel, FTDAccessRuleModel
 
 log = logging.getLogger()
 log.setLevel(common.LOG_LEVEL)
@@ -64,7 +64,7 @@ class TestFMCAccessPolicies(common.TestCommon):
     def test_get_ftd_access_rule(self):
         """Test the read operation for FTDAccessRule"""
         access_rule_obj = self.fmc_client.create_access_rule(
-            self.domain_uuid, self.ftd_ap.id, FTDAccessRuleModel(name="Test-1", enabled=True, action=ActionModel.ALLOW)
+            self.domain_uuid, self.ftd_ap.id, FTDAccessRuleModel(name="Test-1", enabled=True, action=Action.ALLOW)
         )
         self.assertIsInstance(
             self.fmc_client.get_access_rule(self.domain_uuid, self.ftd_ap.id, access_rule_obj.id), FTDAccessRuleModel
@@ -72,7 +72,7 @@ class TestFMCAccessPolicies(common.TestCommon):
 
     def test_create_ftd_access_rule(self):
         """Test the create operation for FTDAccessRules"""
-        new_rule = FTDAccessRuleModel(name="Test-1", enabled=True, action=ActionModel.ALLOW)
+        new_rule = FTDAccessRuleModel(name="Test-1", enabled=True, action=Action.ALLOW)
         self.assertIsInstance(
             self.fmc_client.create_access_rule(self.domain_uuid, self.ftd_ap.id, new_rule), FTDAccessRuleModel
         )
@@ -80,7 +80,7 @@ class TestFMCAccessPolicies(common.TestCommon):
     def test_delete_ftd_access_rule(self):
         """Test the delete operation for FTDAccessRules"""
         access_rule_obj = self.fmc_client.create_access_rule(
-            self.domain_uuid, self.ftd_ap.id, FTDAccessRuleModel(name="Test-1", enabled=True, action=ActionModel.ALLOW)
+            self.domain_uuid, self.ftd_ap.id, FTDAccessRuleModel(name="Test-1", enabled=True, action=Action.ALLOW)
         )
         self.assertIsInstance(
             self.fmc_client.delete_access_rule(self.domain_uuid, self.ftd_ap.id, access_rule_obj.id), FTDAccessRuleModel

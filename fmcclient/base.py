@@ -10,6 +10,11 @@ from requests.exceptions import HTTPError
 log = logging.getLogger(__name__)
 
 
+class DuplicateObject(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+
 class FMCHTTPWrapper(object):
     """This decorator class wraps all API methods of ths client and solves a number of issues.
     All http requests are handled by this decorator to catch 401, 404, and other errors.
@@ -42,20 +47,26 @@ class FMCHTTPWrapper(object):
                     res.raise_for_status()
                 return res.json()  # This should be a json response
             except HTTPError as err:
-                # TODO: Catch "Duplicate Logical Name" and contine....
-                #
                 if res.status_code == 400:
-                    log.error(f"FMCHTTPWrapper called by method {fn.__name__} - {err}")
-                    log.error(err.response.text)
+                    """
+                    Catch duplicate object errors and raise DuplicateObject exception.
+                    Let the consumer decide how to handle these
+                    """
+                    log.error(f"FMCHTTPWrapper called by method {fn.__name__} - {err.response.text}")
                     err_msg = loads(err.response.text)
                     for msg in err_msg["error"]["messages"]:
-                        if msg.get("description").find("Duplicate Logical Name") > -1:
-                            log.error("Duplicate name found. Skipping this object but not raising an error...")
-                            return
+                        if "Duplicate" in msg.get("description"):
+                            raise DuplicateObject(msg.get("description"))
                     raise
-                if res.status_code == 401 or res.status_code == 400:
+                if res.status_code == 400:
                     log.error(f"FMCHTTPWrapper called by {fn.__name__} - {err}")
                     log.error(err.response.text)
+                    raise
+                elif res.status_code == 401:
+                    """Catch authentication errors"""
+                    log.error(
+                        f"FMCHTTPWrapper called by {fn.__name__} - We have called an endpoint path that is invalid: {err}"
+                    )
                     raise
                 elif res.status_code == 404:
                     log.error(

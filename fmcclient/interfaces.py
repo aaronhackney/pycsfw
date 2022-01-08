@@ -27,6 +27,21 @@ class FMCInterfaces:
             )["items"]
         ]
 
+    def get_ftd_physical_iface_by_name(
+        self, domain_uuid: str, container_uuid: str, iface_name: str
+    ) -> FTDPhysicalInterfaceModel:
+        """
+        :param domain_uuid: The UUID of the tenant we are working on
+        :param container_uuid: The UUID of the device we are working on
+        :param iface_name: The name of the intrface to retrieve. eg: GigabitEthernet0/4
+        :return: FTDPhysicalInterface object
+        :rtype: FTDPhysicalInterface (see models.py)
+        """
+        iface_list = self.get_ftd_physical_iface_list(domain_uuid, container_uuid)
+        found_iface = [iface for iface in iface_list if iface.name == iface_name]
+        if found_iface:
+            return found_iface[0]
+
     def get_ftd_physical_iface(self, domain_uuid: str, container_uuid: str, intf_id: str) -> FTDPhysicalInterfaceModel:
         """
         :param domain_uuid: The UUID of the tenant we are working on

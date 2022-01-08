@@ -4,7 +4,7 @@ from fmcclient.models import (
     FTDInterfaceIPv4Model,
     FTDAccessPolicyModel,
     FTDDeviceModel,
-    FTDSecurityZoneModel,
+    FTDInterfaceSecurityZoneModel,
 )
 from unittest import TestCase
 import logging
@@ -24,13 +24,15 @@ SUB_IFACE_CONFIG = FTDSubInterfaceModel(
     ifname="test-sub-1",
     subIntfId=987,
     vlanId=987,
+    mode="NONE",
     ipv4=FTDInterfaceIPv4Model(static={"address": "192.168.40.40", "netmask": "24"}),
 )
 
-PHYSICAL_IFACE_CONFIG = FTDPhysicalInterfaceModel(
+TEST_PHYSICAL_IFACE_CONFIG = FTDPhysicalInterfaceModel(
     name="GigabitEthernet0/4",
     ifname="test-dmz",
     enabled="True",
+    mode="NONE",
     ipv4=FTDInterfaceIPv4Model(static={"address": "192.168.4.4", "netmask": "24"}),
 )
 
@@ -98,18 +100,7 @@ class TestCommon(TestCase):
                 return domain["uuid"]
 
     def get_test_device(self, device_list):
-        if device_list is not None:
-            for device in device_list:
-                if device.name == TEST_DEVICE_NAME:
-                    return device
-
-    def get_subinterface_by_id(self, subif_list: list, subif_id: int):
-        if subif_list is not None:
-            for subif in subif_list:
-                if subif.subIntfId == subif_id:
-                    return subif
-
-    def get_physical_int_by_name(self, iface_list, iface_name):
-        for iface in iface_list:
-            if iface.name == iface_name:
-                return iface
+        if device_list:
+            device = [device for device in device_list if device.name == TEST_DEVICE_NAME]
+        if device:
+            return device[0]
