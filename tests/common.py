@@ -7,6 +7,7 @@ from fmcclient.models import (
     HostObjectModel,
     NetworkObjectModel,
     FTDInterfaceSecurityZoneModel,
+    IPv4StaticRouteModel,
 )
 from unittest import TestCase
 import logging
@@ -72,6 +73,7 @@ HOST_OBJ_2 = HostObjectModel(
         "description": "Test Host obj 2",
     }
 )
+
 
 TEST_ACCESS_POLICY = FTDAccessPolicyModel(
     **{

@@ -23,7 +23,6 @@ class FTDAccessPolicies:
             params={"name": name, "offset": offset, "limit": limit, "expanded": expanded},
         )
         if "items" in policy_list:
-            [print(access_policy) for access_policy in policy_list["items"]]
             return [FTDAccessPolicyModel(**access_policy) for access_policy in policy_list["items"]]
 
     def get_access_policy(self, domain_uuid: str, object_id: str) -> FTDAccessPolicyModel:

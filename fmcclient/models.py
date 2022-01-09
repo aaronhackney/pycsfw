@@ -281,22 +281,22 @@ class IHostObjectContainer(BaseModel):
 
 class StaticRouteModel(BaseModel):
     id: Optional[str]
-    metatdata: Optional[dict]
+    metadata: Optional[dict]
     links: Optional[dict]
     routeTracking: Optional[ISLAMonitorModel]
-    selectedNetworks: Optional[list[NetworkObjectModel]]
-    metricValue: Optional[int]
+    selectedNetworks: list[dict]
+    metricValue: int = 1
     description: Optional[str]
     version: Optional[str]
     name: Optional[str]
     isTunneled: Optional[bool]
-    interfaceName: Optional[str]
-    gateway: Optional[IHostObjectContainer]
+    interfaceName: str = "outside"
+    gateway: dict
 
 
-class IPv4StaticRouteModel(BaseModel):
+class IPv4StaticRouteModel(StaticRouteModel):
     type: str = "IPv4StaticRoute"
 
 
-class IPv6StaticRouteModel(BaseModel):
+class IPv6StaticRouteModel(StaticRouteModel):
     type: str = "IPv6StaticRoute"

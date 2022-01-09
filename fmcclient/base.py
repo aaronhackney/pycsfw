@@ -236,3 +236,10 @@ class FMCBaseClient(object):
             "global": headers.get("global"),
             "DOMAINS": loads(headers.get("DOMAINS")),
         }
+
+    def _serialize_objects(self, obj_list: list) -> list:
+        serializable_objs = []
+        for i, net_obj in enumerate(obj_list):
+            obj_list[i].metadata = None
+            serializable_objs.append(obj_list[i].dict(exclude_unset=True))
+        return serializable_objs
