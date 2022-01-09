@@ -41,6 +41,24 @@ class InterfaceMode(str, Enum):
     SWITCHPORT = "SWITCHPORT"
 
 
+class NetworkObjectModel(BaseModel):
+    metadata: Optional[dict]
+    overridable: Optional[bool]
+    name: Optional[str]
+    description: Optional[str]
+    links: Optional[dict]
+    overrides: Optional[dict]  # TODO model overrides
+    id: Optional[str]
+    type: str = "Network"
+    value: Optional[str]
+    version: Optional[str]
+    overrideTargetId: Optional[str]
+
+
+class HostObjectModel(NetworkObjectModel):
+    type: str = "Host"
+
+
 class FTDAccessRuleModel(BaseModel):
     id: Optional[str]
     name: Optional[str]
@@ -235,3 +253,50 @@ class FMCVariableSetModel(BaseModel):
     links: Optional[dict]
     metadata: Optional[dict]
     type: str = "VariableSet"
+
+
+class ISLAMonitorModel(BaseModel):
+    noOfPackets: Optional[int]
+    slaId: Optional[int]
+    dataSize: Optional[int]
+    description: Optional[str]
+    threshold: Optional[int]
+    interfaceNames: Optional[list[str]]
+    type: Optional[str]
+    version: Optional[str]
+    interfaceObjects: Optional[list[FTDInterfaceModel]]
+    timeout: Optional[int]
+    frequency: Optional[int]
+    monitorAddress: Optional[str]
+    name: Optional[str]
+    tos: Optional[int]
+    links: Optional[dict]
+    id: Optional[str]
+
+
+class IHostObjectContainer(BaseModel):
+    literal: Optional[dict]  # TODO model 	INetworkAddressLiteral
+    object: Optional[HostObjectModel]
+
+
+class StaticRouteModel(BaseModel):
+    id: Optional[str]
+    metatdata: Optional[dict]
+    links: Optional[dict]
+    routeTracking: Optional[ISLAMonitorModel]
+    selectedNetworks: Optional[list[NetworkObjectModel]]
+    metricValue: Optional[int]
+    description: Optional[str]
+    version: Optional[str]
+    name: Optional[str]
+    isTunneled: Optional[bool]
+    interfaceName: Optional[str]
+    gateway: Optional[IHostObjectContainer]
+
+
+class IPv4StaticRouteModel(BaseModel):
+    type: str = "IPv4StaticRoute"
+
+
+class IPv6StaticRouteModel(BaseModel):
+    type: str = "IPv6StaticRoute"

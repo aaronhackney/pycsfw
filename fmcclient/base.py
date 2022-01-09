@@ -65,24 +65,30 @@ class FMCHTTPWrapper(object):
                 elif res.status_code == 401:
                     """Catch authentication errors"""
                     log.error(
-                        f"FMCHTTPWrapper called by {fn.__name__} - We have called an endpoint path that is invalid: {err}"
+                        f"FMCHTTPWrapper called by {fn.__name__} - 401 Forbidden. Invalid token?: {err.response.text}"
                     )
+                    raise
+                elif res.status_code == 403:
+                    """Catch forbidden errors"""
+                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - 403 Forbidden: {err.response.text}")
                     raise
                 elif res.status_code == 404:
                     log.error(
-                        f"FMCHTTPWrapper called by {fn.__name__} - We have called an endpoint path that is invalid: {err}"
+                        f"FMCHTTPWrapper called by {fn.__name__} - We have called an endpoint path that is invalid: {err.response.text}"
                     )
                     raise
                 elif res.status_code == 405:
-                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - Unsupported: {err}")
+                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - Unsupported: {err.response.text}")
                     log.error(err.response.text)
                     raise
                 elif res.status_code == 422:
-                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - We have provided invalid input: {err}")
+                    log.error(
+                        f"FMCHTTPWrapper called by {fn.__name__} - We have provided invalid input: {err.response.text}"
+                    )
                     log.error(err.response.text)
                     raise
                 else:
-                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - HTTP Error returned: {err}")
+                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - HTTP Error returned: {err.response.text}")
                     raise
 
         return new_func

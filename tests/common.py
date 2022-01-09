@@ -4,6 +4,8 @@ from fmcclient.models import (
     FTDInterfaceIPv4Model,
     FTDAccessPolicyModel,
     FTDDeviceModel,
+    HostObjectModel,
+    NetworkObjectModel,
     FTDInterfaceSecurityZoneModel,
 )
 from unittest import TestCase
@@ -36,20 +38,40 @@ TEST_PHYSICAL_IFACE_CONFIG = FTDPhysicalInterfaceModel(
     ipv4=FTDInterfaceIPv4Model(static={"address": "192.168.4.4", "netmask": "24"}),
 )
 
-NET_OBJ_1 = {
-    "name": "test1",
-    "value": "192.168.1.0/24",
-    "overridable": False,
-    "description": "Test Network obj 1",
-    "type": "Network",
-}
-NET_OBJ_2 = {
-    "name": "test2",
-    "value": "192.168.2.0/24",
-    "overridable": False,
-    "description": "Test Network obj 2",
-    "type": "Network",
-}
+NET_OBJ_1 = NetworkObjectModel(
+    **{
+        "name": "unittest-network-1",
+        "value": "192.168.1.0/24",
+        "overridable": False,
+        "description": "Test Network obj 1",
+    }
+)
+NET_OBJ_2 = NetworkObjectModel(
+    **{
+        "name": "unittest-network-2",
+        "value": "192.168.2.0/24",
+        "overridable": False,
+        "description": "Test Network obj 2",
+    }
+)
+
+HOST_OBJ_1 = HostObjectModel(
+    **{
+        "name": "unittest-host-1",
+        "value": "192.168.1.199",
+        "overridable": False,
+        "description": "Test Host obj 1",
+    }
+)
+
+HOST_OBJ_2 = HostObjectModel(
+    **{
+        "name": "unittest-host-2",
+        "value": "192.168.2.199",
+        "overridable": False,
+        "description": "Test Host obj 2",
+    }
+)
 
 TEST_ACCESS_POLICY = FTDAccessPolicyModel(
     **{
@@ -66,11 +88,13 @@ TEST_ACCESS_POLICY = FTDAccessPolicyModel(
 )
 
 TEST_DEVICE = FTDDeviceModel(
-    name="test-ftd",
-    hostName="192.168.1.100",
-    regKey="abc123",
-    license_caps=["BASE", "THREAT"],
-    description="Test device",
+    **{
+        "name": "test-ftd",
+        "hostName": "192.168.1.100",
+        "regKey": "abc123",
+        "license_caps": ["BASE", "THREAT"],
+        "description": "Test device",
+    }
 )
 
 

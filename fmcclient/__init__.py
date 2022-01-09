@@ -5,11 +5,12 @@ from .base import FMCBaseClient
 from .system import FMCSystem
 from .devices import FMCDevices
 from .ap import FTDAccessPolicies
-from .net_objects import FMCNetworkObjects
+from .network_objs import NetworkObjects
 from .variables import FMCVariableSets
 from .chassis import FMCManagedChassis
 from .interfaces import FMCInterfaces
-from .zones import FMCSecurityZone
+from .zones import FTDSecurityZone
+from .routes import FTDStaticRoutes
 
 log = logging.getLogger(__name__)
 
@@ -19,11 +20,12 @@ class FMCClient(
     FMCSystem,
     FMCDevices,
     FTDAccessPolicies,
-    FMCNetworkObjects,
+    NetworkObjects,
     FMCVariableSets,
     FMCManagedChassis,
     FMCInterfaces,
-    FMCSecurityZone,
+    FTDSecurityZone,
+    FTDStaticRoutes,
 ):
     def __init__(
         self, ftd_ip: str, username: str, password: str, verify: bool = True, timeout: int = 30, fmc_port=None

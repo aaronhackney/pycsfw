@@ -4,7 +4,7 @@ from fmcclient.models import FTDSecurityZoneModel
 log = logging.getLogger(__name__)
 
 
-class FMCSecurityZone:
+class FTDSecurityZone:
     def get_security_zones_list(
         self, domain_uuid: str, expanded: bool = True, offset: int = 0, limit: int = 999
     ) -> list[FTDSecurityZoneModel]:
@@ -16,13 +16,12 @@ class FMCSecurityZone:
         :return: list of FTDSecurityZone objects (see models.py)
         :rtype: list
         """
-        return [
-            FTDSecurityZoneModel(**var_set)
-            for var_set in self.get(
-                f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/object/securityzones",
-                params={"offset": offset, "limit": limit, "expanded": expanded},
-            )["items"]
-        ]
+        zone_list = self.get(
+            f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/object/securityzones",
+            params={"offset": offset, "limit": limit, "expanded": expanded},
+        )
+        if "items" in zone_list:
+            return [FTDSecurityZoneModel(**zone) for zone in zone_list["items"]]
 
     def get_security_zone(self, domain_uuid: str, zone_id: str, group_by_device: bool = True) -> FTDSecurityZoneModel:
         """
