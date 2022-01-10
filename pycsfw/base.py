@@ -119,6 +119,8 @@ class BaseClient(object):
         self.username = username
         self.password = password
         self.token = None
+        self.domain_uuid = None
+        self.get_auth_token()
 
     def set_headers(self, headers: dict = None) -> dict:
         """
@@ -251,11 +253,11 @@ class BaseClient(object):
 
     def get_domain_uuid(self, domain_name: str) -> str:
         """
-        Given a Cisco Secure Firewall Manager Domain, return the domain's UUID
+        Given a Cisco Secure Firewall Manager Domain, set and then return the domain's UUID
         :param domain_name: The domain name of the Firewall Manager's domain. e.g. "Global/Customer A"
         :return: The str containing the UUID of the domain on which we wish to perfomm API calls
         :rtype: str
         """
         domain_uuid = [domain for domain in self.token["DOMAINS"] if domain["name"] == domain_name]
         if domain_uuid:
-            return domain_uuid[0].get("uuid")
+            self.domain_uuid = domain_uuid[0].get("uuid")

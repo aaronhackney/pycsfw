@@ -14,7 +14,7 @@ def main():
     print(f"Domain UUID: {domain_uuid}")
 
     # Get a device UUID (This assumes the Managment Center domain has at least 1 device registered)
-    devices = csfw_client.get_fmc_device_records_list(domain_uuid, expanded=True)
+    devices = csfw_client.get_device_records_list(domain_uuid, expanded=True)
     if devices:
         device_uuid = devices[0].id
         print(json.dumps(devices[0].dict(exclude_unset=True), indent=4))

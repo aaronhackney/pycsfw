@@ -5,10 +5,18 @@ This library is intended to abstract the complexities of interacting with the Ci
 This library was developed and tested under python 3.10 and Cisco Secure Firewall Management Center Management center 7.1. Prior versions may work, but YMMV.
 
 # Installation
-1. git clone git@github.com:aaronhackney/pycsfw.git
-2. cd pycsfw
-3. pip install -r requirements.txt
-4. pip install -e . (The period is required!)
+1. (Optional) Create a python virtual environement. The below commands will create the venv in the existing directory `~/envs/` and activate it as the current python interpreter.
+```
+python3 -m venv ~/envs/pycsfw && source ~/envs/pycsfw/bin/activate
+```
+
+2. Clone or download/unzip the repo and install the module
+```
+git clone git@github.com:aaronhackney/pycsfw.git
+cd pycsfw
+pip install -r requirements.txt
+pip install -e .
+```
 
 You can verify that the package is installed with `pip list | grep pycsfw`
 ```
@@ -22,6 +30,7 @@ The sample and tests packages have a few examples that should give one a good id
 ## 1. Instantiate the Client and get a token
 ```
 from pycsfw import CSFWClient
+
 csfw_client = CSFWClient('192.168.1.30', "admin", "mypassword", verify=False)
 csfw_client.get_auth_token()
 ```

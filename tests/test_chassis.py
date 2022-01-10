@@ -15,4 +15,4 @@ class TestFMCManagedChassis(common.TestCommon):
         self.common_setup()
 
     def test_get_managed_chassis_list(self):
-        test = self.csfw_client.get_fmc_managed_chassis_list(self.domain_uuid)
+        test = self.csfw_client.get_managed_chassis_list()

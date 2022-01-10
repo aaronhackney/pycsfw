@@ -115,13 +115,8 @@ class TestCommon(TestCase):
         self.csfw_client = CSFWClient(self.ftd_ip, self.username, self.password, verify=self.verify)
         self.csfw_client.get_auth_token()
         self.assertIsNotNone(self.csfw_client.token)
-        self.domain_uuid = self.get_domain_uuid()
-        self.device = self.get_test_device(self.csfw_client.get_fmc_device_records_list(self.domain_uuid))
-
-    def get_domain_uuid(self):
-        for domain in self.csfw_client.token["DOMAINS"]:
-            if domain["name"] == TEST_DOMAIN:
-                return domain["uuid"]
+        self.csfw_client.get_domain_uuid(TEST_DOMAIN)
+        self.device = self.get_test_device(self.csfw_client.get_device_records_list())
 
     def get_test_device(self, device_list):
         if device_list:

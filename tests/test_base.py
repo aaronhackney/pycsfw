@@ -15,15 +15,16 @@ class TestBaseClient(common.TestCommon):
         self.common_setup()
 
     def test_client_instance(self):
-        fmc_client = CSFWClient(
+        csfw_client = CSFWClient(
             environ.get("FMCIP"),
             environ.get("FMCUSER"),
             environ.get("FMCPASS"),
             verify=getenv("VERIFY", "True").lower() in ("false", "0", "f"),
         )
-        fmc_client.get_auth_token()
-        self.assertIn("X-auth-access-token", fmc_client.token)
+        csfw_client.get_auth_token()
+        self.assertIn("X-auth-access-token", csfw_client.token)
 
     def test_get_domain_uuid(self):
-        domain_uuid = self.csfw_client.get_domain_uuid(common.TEST_DOMAIN)
-        self.assertIsInstance(domain_uuid, str)
+        self.csfw_client.domain_uuid = None
+        self.csfw_client.get_domain_uuid(common.TEST_DOMAIN)
+        self.assertIsInstance(self.csfw_client.domain_uuid, str)
