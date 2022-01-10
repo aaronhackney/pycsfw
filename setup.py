@@ -19,18 +19,17 @@ def get_version(rel_path):
 
 
 setuptools.setup(
-    name="fmcclient",
+    name="pycsfw",
     packages=setuptools.find_packages(),
-    version=get_version("fmcclient/__init__.py"),
+    version=get_version("pycsfw/__init__.py"),
     license="GPL 3.0 https://www.gnu.org/licenses/gpl-3.0.txt",
-    description="fmcclient",
+    description="SDK like Library to abstract the Cisco Secure Firewall Management Center",
     author="Aaron K. Hackney",
     author_email="aaron_309@yahoo.com",
     url="https://github.com/aaronhackney/fmcclient",
     download_url="",
-    # keywords=["word1", "word2"],
-    install_requires=["requests >= 2.25.1", "setuptools >= 51.1.2"],
-    # entry_points={"console_scripts": ["pyftd = pyftd.__main__:main"]},
+    keywords=["cisco", "sdk", "secure", "firewall", "manager", "management", "fmc", "firepower", "center"],
+    install_requires=["requests >= 2.25.1", "setuptools >= 51.1.2", "pydantic >= 1.9.0"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Topic :: Utilities",

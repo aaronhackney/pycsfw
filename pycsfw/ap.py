@@ -1,6 +1,6 @@
 import logging
-from fmcclient import variables
-from fmcclient.models import FTDAccessPolicyModel, FTDAccessRuleModel
+from pycsfw import variables
+from pycsfw.models import FTDAccessPolicyModel, FTDAccessRuleModel
 
 log = logging.getLogger(__name__)
 

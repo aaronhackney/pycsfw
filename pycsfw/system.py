@@ -1,12 +1,12 @@
 import logging
 from json import loads
-from fmcclient.models import FMCDomainModel, FMCServerVersionModel
+from pycsfw.models import DomainModel, FMCServerVersionModel
 
 log = logging.getLogger(__name__)
 
 
 class System:
-    def get_fmc_domain_list(self, expanded: bool = True, offset: int = 0, limit: int = 999) -> list[FMCDomainModel]:
+    def get_fmc_domain_list(self, expanded: bool = True, offset: int = 0, limit: int = 999) -> list[DomainModel]:
         """
         :param domain_uuid: The UUID of the tenant we are working on
         :param container_uuid: The UUID of the device we are working on
@@ -20,12 +20,12 @@ class System:
             f"{self.PLATFORM_PREFIX}/info/domain", params={"offset": offset, "limit": limit, "expanded": expanded}
         )
         if "items" in domains:
-            return [FMCDomainModel(**domain) for domain in domains["items"]]
+            return [DomainModel(**domain) for domain in domains["items"]]
 
     def get_fmc_domain(self, domain_uuid, object_id):
         domain = self.get(f"{self.PLATFORM_PREFIX}/api/fmc_platform/v1/info/domain/{domain_uuid}/{object_id}")
         if domain is not None:
-            return FMCDomainModel(**domain)
+            return DomainModel(**domain)
 
     def get_fmc_version_list(self, expanded=True, offset=0, limit=999):
         fmc_versions = self.get(

@@ -14,7 +14,7 @@ class TestFMCSystem(common.TestCommon):
         self.common_setup()
 
     def test_get_domain_list(self):
-        self.assertIsInstance(self.fmc_client.get_fmc_domain_list(), list)
+        self.assertIsInstance(self.csfw_client.get_fmc_domain_list(), list)
 
     def test_get_fmc_version_list(self):
-        self.assertIsInstance(self.fmc_client.get_fmc_version_list(), list)
+        self.assertIsInstance(self.csfw_client.get_fmc_version_list(), list)

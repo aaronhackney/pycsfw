@@ -1,5 +1,5 @@
 import logging
-from fmcclient.models import FTDPhysicalInterfaceModel, FTDSubInterfaceModel
+from pycsfw.models import FTDPhysicalInterfaceModel, FTDSubInterfaceModel
 
 log = logging.getLogger(__name__)
 

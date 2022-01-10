@@ -135,7 +135,7 @@ class FTDAccessPolicyModel(BaseModel):
     type: str = "AccessPolicy"
 
 
-class FMCDomainModel(BaseModel):
+class DomainModel(BaseModel):
     uuid: str
     name: str
     type: str = "Domain"
@@ -246,7 +246,7 @@ class FTDSecurityZoneModel(FTDInterfaceSecurityZoneModel):
     interfaceMode: Optional[ZoneInterfaceModes]
 
 
-class FMCVariableSetModel(BaseModel):
+class VariableSetModel(BaseModel):
     id: Optional[str]
     name: Optional[str]
     description: Optional[str]

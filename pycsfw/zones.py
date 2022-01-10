@@ -1,5 +1,5 @@
 import logging
-from fmcclient.models import FTDSecurityZoneModel
+from pycsfw.models import FTDSecurityZoneModel
 
 log = logging.getLogger(__name__)
 

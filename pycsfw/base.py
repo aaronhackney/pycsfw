@@ -1,10 +1,8 @@
 import logging
 import requests
 from json import loads
-from requests.auth import HTTPBasicAuth
 from functools import wraps
-
-# from urllib.error import HTTPError
+from requests.auth import HTTPBasicAuth
 from requests.exceptions import HTTPError
 
 log = logging.getLogger(__name__)
@@ -16,8 +14,8 @@ class DuplicateObject(Exception):
 
 
 class HTTPWrapper(object):
-    """This decorator class wraps all API methods of ths client and solves a number of issues.
-    All http requests are handled by this decorator to catch 401, 404, and other errors.
+    """This decorator class wraps all API calls from this client.
+    All http requests are handled by this decorator to catch 401, 404, 422, and other errors.
     """
 
     # TODO work out the logic to obtain a new token but watch for race condition
@@ -39,8 +37,6 @@ class HTTPWrapper(object):
                         return res
                 elif res.status_code == 422:
                     res.raise_for_status()
-                # if "error" in _res and _res["error"]["status"] in (401, 400):
-                #     raise HTTPError(res.url, _res["error"]["status"], _res["error"]["message"])
                 elif res.status_code == 400:
                     res.raise_for_status()
                 else:
@@ -92,7 +88,7 @@ class HTTPWrapper(object):
 
 class BaseClient(object):
     """
-    This class is inherited by all FMC API classes and is always instantiated and is where the auth token for the FMC
+    This class is inherited by all FMC API classes and is always instantiated and is where the auth token for the CSFMC
     is obtained and other functions that are needed by multiple inherited classes
     """
 
@@ -101,22 +97,35 @@ class BaseClient(object):
 
     def __init__(
         self,
-        fmc_ip: str,
+        ip: str,
         username: str,
         password: str,
         verify: bool = True,
-        fmc_port: str = None,
+        port: str = None,
         timeout: int = 30,
-    ):
-        self.fmc_port = str(fmc_port) if fmc_port else None
-        self.base_url = f"https://{fmc_ip}:{self.fmc_port}" if fmc_port else f"https://{fmc_ip}"
+    ) -> None:
+        """
+        :param ip: The IP of the Cisco Secure Firewall Management Center
+        :param username: The username for the CSFMC
+        :param password: The password for the CSFMC
+        :param verify: Enable or disable TLS/SSL Certificate Checking when accessing the CSFMC API (Default=True)
+        :param port: The port that the CSFMC API is listening on (Default = 443)
+        :param timeout: TCP timeout when attempting to reach the CSFMC API
+        """
+        self.port = str(port) if port else None
+        self.base_url = f"https://{ip}:{self.port}" if port else f"https://{ip}"
         self.verify = verify  # allow API self-signed certs * DANGER *
         self.timeout = timeout
         self.username = username
         self.password = password
         self.token = None
 
-    def set_headers(self, headers=None):
+    def set_headers(self, headers: dict = None) -> dict:
+        """
+        Used to override the headers that will be sent with every API call to the CSFMC
+        :param headers: dict of headers to send with each API call. Note that if a user supplies this variable,
+                        they will also need "Content-Type" and "X-auth-access-token" headers in this dict
+        """
         if headers is None:
             if self.token is not None:
                 return {
@@ -132,12 +141,13 @@ class BaseClient(object):
         self.token = self.parse_auth_headers(self.post(f"{self.PLATFORM_PREFIX}/auth/generatetoken", auth=True))
 
     @HTTPWrapper()
-    def get(self, endpoint: str, **kwargs) -> dict:
+    def get(self, endpoint: str, **kwargs: dict) -> dict:
         """
         Perform an http get using the requests library
         :param endpoint: API endpoint to call. Like /api/fmc_platform/v1/domain/{domain_uuid}/devices/devicerecords
         :param headers: HTTP headers, including the auth token
         :param auth: Boolean True for passing basic auth with http req, otherwise omit or False
+        :param params: The http parameters (http query) to append to the URL
         :return: dict
         :rtype: dict
         """
@@ -151,13 +161,14 @@ class BaseClient(object):
         return r
 
     @HTTPWrapper()
-    def post(self, endpoint: str, **kwargs) -> dict:
+    def post(self, endpoint: str, **kwargs: dict) -> dict:
         """
         Perform an http post using the requests library
         :param endpoint: API endpoint to call. Like /api/fmc_platform/v1/domain/{domain_uuid}/devices/devicerecords
         :param data: dict of the data we wish to put or post
         :param headers: http headers, including the auth token
         :param auth: Boolean True for passing basic auth with http req, otherwise omit or False
+        :param params: The http parameters (http query) to append to the URL
         :return: dict
         :rtype: dict
         """
@@ -179,11 +190,10 @@ class BaseClient(object):
             timeout=self.timeout,
             params=params,
         )
-        log.debug(f"HTTP Request Status Code: {r.status_code}")
         return r
 
     @HTTPWrapper()
-    def put(self, endpoint: str, **kwargs) -> dict:
+    def put(self, endpoint: str, **kwargs: dict) -> dict:
         """
         Perform an http put using the requests library
         :param endpoint: API endpoint to call. Like /api/fmc_platform/v1/domain/{domain_uuid}/devices/devicerecords
@@ -207,11 +217,10 @@ class BaseClient(object):
             verify=self.verify,
             timeout=self.timeout,
         )
-        log.debug(f"HTTP Request Status Code: {r.status_code}")
         return r
 
     @HTTPWrapper()
-    def delete(self, endpoint: str, **kwargs) -> dict:
+    def delete(self, endpoint: str, **kwargs: dict) -> dict:
         """
         Perform an http delete using the requests library
         :param endpoint: API endpoint to call. Like /api/fmc_platform/v1/domain/{domain_uuid}/devices/devicerecords
@@ -239,3 +248,14 @@ class BaseClient(object):
             obj_list[i].metadata = None
             serializable_objs.append(obj_list[i].dict(exclude_unset=True))
         return serializable_objs
+
+    def get_domain_uuid(self, domain_name: str) -> str:
+        """
+        Given a Cisco Secure Firewall Manager Domain, return the domain's UUID
+        :param domain_name: The domain name of the Firewall Manager's domain. e.g. "Global/Customer A"
+        :return: The str containing the UUID of the domain on which we wish to perfomm API calls
+        :rtype: str
+        """
+        domain_uuid = [domain for domain in self.token["DOMAINS"] if domain["name"] == domain_name]
+        if domain_uuid:
+            return domain_uuid[0].get("uuid")

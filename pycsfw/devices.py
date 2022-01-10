@@ -1,5 +1,5 @@
 import logging
-from fmcclient.models import FTDDeviceModel
+from pycsfw.models import FTDDeviceModel
 
 log = logging.getLogger(__name__)
 

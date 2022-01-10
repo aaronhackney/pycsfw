@@ -1,4 +1,4 @@
-from fmcclient.models import (
+from pycsfw.models import (
     FTDPhysicalInterfaceModel,
     FTDSubInterfaceModel,
     FTDInterfaceIPv4Model,
@@ -6,13 +6,11 @@ from fmcclient.models import (
     FTDDeviceModel,
     HostObjectModel,
     NetworkObjectModel,
-    FTDInterfaceSecurityZoneModel,
-    IPv4StaticRouteModel,
 )
 from unittest import TestCase
 import logging
 from os import environ, getenv
-from fmcclient import FMCClient
+from pycsfw import CSFWClient
 
 """ These are constants and functions that are used throughout the various tests"""
 LOG_LEVEL = logging.DEBUG
@@ -114,14 +112,14 @@ class TestCommon(TestCase):
         self.ftd_ip = environ.get("FMCIP")
         self.username = environ.get("FMCUSER")
         self.password = environ.get("FMCPASS")
-        self.fmc_client = FMCClient(self.ftd_ip, self.username, self.password, verify=self.verify)
-        self.fmc_client.get_auth_token()
-        self.assertIsNotNone(self.fmc_client.token)
+        self.csfw_client = CSFWClient(self.ftd_ip, self.username, self.password, verify=self.verify)
+        self.csfw_client.get_auth_token()
+        self.assertIsNotNone(self.csfw_client.token)
         self.domain_uuid = self.get_domain_uuid()
-        self.device = self.get_test_device(self.fmc_client.get_fmc_device_records_list(self.domain_uuid))
+        self.device = self.get_test_device(self.csfw_client.get_fmc_device_records_list(self.domain_uuid))
 
     def get_domain_uuid(self):
-        for domain in self.fmc_client.token["DOMAINS"]:
+        for domain in self.csfw_client.token["DOMAINS"]:
             if domain["name"] == TEST_DOMAIN:
                 return domain["uuid"]
 

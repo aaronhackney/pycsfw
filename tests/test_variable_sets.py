@@ -2,7 +2,7 @@ import common
 
 import logging
 
-from fmcclient.models import FMCVariableSetModel
+from pycsfw.models import VariableSetModel
 
 log = logging.getLogger()
 log.setLevel(common.LOG_LEVEL)
@@ -18,12 +18,12 @@ class TestFMCVariableSets(common.TestCommon):
 
     def test_get_fmc_network_object_list(self):
         self.assertTrue(
-            self.fmc_client.get_fmc_variable_set_list(self.domain_uuid)[0]["name"].__contains__("Default-Set")
+            self.csfw_client.get_fmc_variable_set_list(self.domain_uuid)[0]["name"].__contains__("Default-Set")
         )
 
     def test_get_fmc_variable_set_list(self):
         passed = False
-        variable_sets = self.fmc_client.get_fmc_variable_set_list(self.domain_uuid)
+        variable_sets = self.csfw_client.get_fmc_variable_set_list(self.domain_uuid)
         default_var_set_list = list(filter(lambda x: "Default-Set" == x.name, variable_sets))
-        default_var_set = self.fmc_client.get_fmc_variable_set(self.domain_uuid, default_var_set_list[0].id)
-        self.assertIsInstance(default_var_set, FMCVariableSetModel)
+        default_var_set = self.csfw_client.get_fmc_variable_set(self.domain_uuid, default_var_set_list[0].id)
+        self.assertIsInstance(default_var_set, VariableSetModel)

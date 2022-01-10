@@ -1,5 +1,5 @@
 import logging
-from fmcclient.models import IPv4StaticRouteModel
+from pycsfw.models import IPv4StaticRouteModel
 
 log = logging.getLogger(__name__)
 
@@ -96,3 +96,6 @@ class StaticRoutes:
                 f"{self.CONFIG_PREFIX}/domain/{domain_uuid}/devices/devicerecords/{device_uuid}/routing/ipv4staticroutes/{route_obj_id}",
             )
         )
+
+    # TODO: IPv6StaticRoutes
+    # TODO: static route searches based on networks and gateways
