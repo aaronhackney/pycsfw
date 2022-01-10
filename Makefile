@@ -1,5 +1,5 @@
 HOST=127.0.0.1
-PACKAGE:=pyftd
+PACKAGE:=pycsfw
 
 .PHONY : clean
 .DEFAULT_GOAL = help
