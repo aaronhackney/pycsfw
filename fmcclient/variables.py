@@ -4,7 +4,7 @@ from fmcclient.models import FMCVariableSetModel
 log = logging.getLogger(__name__)
 
 
-class FMCVariableSets:
+class VariableSets:
     def get_fmc_variable_set_list(
         self, domain_uuid: str, expanded: bool = True, offset: int = 0, limit: int = 999
     ) -> list[FMCVariableSetModel]:

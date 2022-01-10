@@ -1,33 +1,33 @@
 __version__ = "0.1.0"
 
 import logging
-from .base import FMCBaseClient
-from .system import FMCSystem
-from .devices import FMCDevices
-from .ap import FTDAccessPolicies
+from .base import BaseClient
+from .system import System
+from .devices import Devices
+from .ap import AccessPolicies
 from .network_objs import NetworkObjects
-from .variables import FMCVariableSets
+from .variables import VariableSets
 from .chassis import FMCManagedChassis
-from .interfaces import FMCInterfaces
-from .zones import FTDSecurityZone
-from .routes import FTDStaticRoutes
+from .interfaces import Interfaces
+from .zones import SecurityZone
+from .routes import StaticRoutes
 
 log = logging.getLogger(__name__)
 
 
 class FMCClient(
-    FMCBaseClient,
-    FMCSystem,
-    FMCDevices,
-    FTDAccessPolicies,
+    BaseClient,
+    System,
+    Devices,
+    AccessPolicies,
     NetworkObjects,
-    FMCVariableSets,
+    VariableSets,
     FMCManagedChassis,
-    FMCInterfaces,
-    FTDSecurityZone,
-    FTDStaticRoutes,
+    Interfaces,
+    SecurityZone,
+    StaticRoutes,
 ):
     def __init__(
         self, ftd_ip: str, username: str, password: str, verify: bool = True, timeout: int = 30, fmc_port=None
     ):
-        FMCBaseClient.__init__(self, ftd_ip, username, password, verify, fmc_port=fmc_port, timeout=timeout)
+        BaseClient.__init__(self, ftd_ip, username, password, verify, fmc_port=fmc_port, timeout=timeout)

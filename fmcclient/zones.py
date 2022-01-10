@@ -4,7 +4,7 @@ from fmcclient.models import FTDSecurityZoneModel
 log = logging.getLogger(__name__)
 
 
-class FTDSecurityZone:
+class SecurityZone:
     def get_security_zones_list(
         self, domain_uuid: str, expanded: bool = True, offset: int = 0, limit: int = 999
     ) -> list[FTDSecurityZoneModel]:

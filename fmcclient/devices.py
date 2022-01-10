@@ -4,7 +4,7 @@ from fmcclient.models import FTDDeviceModel
 log = logging.getLogger(__name__)
 
 
-class FMCDevices:
+class Devices:
     """This class is for manipulating sensors (devices) managed by an FMC."""
 
     def get_fmc_device_records_list(self, domain_uuid: str, expanded: bool = True, offset: int = 0, limit: int = 999):

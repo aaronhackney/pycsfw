@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 # TODO: model vlaninterfaces
 
 
-class FMCInterfaces:
+class Interfaces:
     def get_ftd_physical_iface_list(
         self, domain_uuid: str, container_uuid: str, expanded: bool = True, offset: int = 0, limit: int = 999
     ) -> list[FTDPhysicalInterfaceModel]:

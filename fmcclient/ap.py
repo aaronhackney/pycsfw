@@ -5,7 +5,7 @@ from fmcclient.models import FTDAccessPolicyModel, FTDAccessRuleModel
 log = logging.getLogger(__name__)
 
 
-class FTDAccessPolicies:
+class AccessPolicies:
     def get_access_policy_list(
         self, domain_uuid: str, name: str = None, expanded: bool = True, offset: int = 0, limit: int = 999
     ) -> list[FTDAccessPolicyModel]:

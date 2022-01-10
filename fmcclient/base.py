@@ -15,7 +15,7 @@ class DuplicateObject(Exception):
         self.msg = msg
 
 
-class FMCHTTPWrapper(object):
+class HTTPWrapper(object):
     """This decorator class wraps all API methods of ths client and solves a number of issues.
     All http requests are handled by this decorator to catch 401, 404, and other errors.
     """
@@ -55,12 +55,8 @@ class FMCHTTPWrapper(object):
                     log.error(f"FMCHTTPWrapper called by method {fn.__name__} - {err.response.text}")
                     err_msg = loads(err.response.text)
                     for msg in err_msg["error"]["messages"]:
-                        if "Duplicate" in msg.get("description"):
+                        if "Duplicate" in msg.get("description") or "already exists" in msg.get("description"):
                             raise DuplicateObject(msg.get("description"))
-                    raise
-                if res.status_code == 400:
-                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - {err}")
-                    log.error(err.response.text)
                     raise
                 elif res.status_code == 401:
                     """Catch authentication errors"""
@@ -94,7 +90,7 @@ class FMCHTTPWrapper(object):
         return new_func
 
 
-class FMCBaseClient(object):
+class BaseClient(object):
     """
     This class is inherited by all FMC API classes and is always instantiated and is where the auth token for the FMC
     is obtained and other functions that are needed by multiple inherited classes
@@ -135,7 +131,7 @@ class FMCBaseClient(object):
     def get_auth_token(self):
         self.token = self.parse_auth_headers(self.post(f"{self.PLATFORM_PREFIX}/auth/generatetoken", auth=True))
 
-    @FMCHTTPWrapper()
+    @HTTPWrapper()
     def get(self, endpoint: str, **kwargs) -> dict:
         """
         Perform an http get using the requests library
@@ -154,7 +150,7 @@ class FMCBaseClient(object):
         r = requests.get(self.base_url + endpoint, headers=my_headers, verify=self.verify, params=params, auth=auth)
         return r
 
-    @FMCHTTPWrapper()
+    @HTTPWrapper()
     def post(self, endpoint: str, **kwargs) -> dict:
         """
         Perform an http post using the requests library
@@ -186,7 +182,7 @@ class FMCBaseClient(object):
         log.debug(f"HTTP Request Status Code: {r.status_code}")
         return r
 
-    @FMCHTTPWrapper()
+    @HTTPWrapper()
     def put(self, endpoint: str, **kwargs) -> dict:
         """
         Perform an http put using the requests library
@@ -214,7 +210,7 @@ class FMCBaseClient(object):
         log.debug(f"HTTP Request Status Code: {r.status_code}")
         return r
 
-    @FMCHTTPWrapper()
+    @HTTPWrapper()
     def delete(self, endpoint: str, **kwargs) -> dict:
         """
         Perform an http delete using the requests library

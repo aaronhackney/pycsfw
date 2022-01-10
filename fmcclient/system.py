@@ -5,7 +5,7 @@ from fmcclient.models import FMCDomainModel, FMCServerVersionModel
 log = logging.getLogger(__name__)
 
 
-class FMCSystem:
+class System:
     def get_fmc_domain_list(self, expanded: bool = True, offset: int = 0, limit: int = 999) -> list[FMCDomainModel]:
         """
         :param domain_uuid: The UUID of the tenant we are working on
