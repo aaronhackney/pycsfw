@@ -279,12 +279,24 @@ class IHostObjectContainer(BaseModel):
     object: Optional[HostObjectModel]
 
 
+class INetworkAddress(BaseModel):  # this can be a host object or a network object
+    metadata: Optional[dict]
+    overridable: Optional[bool]
+    name: Optional[str]
+    description: Optional[str]
+    links: Optional[dict]
+    overrides: Optional[dict]
+    id: Optional[str]
+    type: Optional[str]
+    version: Optional[str]
+
+
 class StaticRouteModel(BaseModel):
     id: Optional[str]
     metadata: Optional[dict]
     links: Optional[dict]
     routeTracking: Optional[ISLAMonitorModel]
-    selectedNetworks: Optional[list[dict]]
+    selectedNetworks: Optional[list[INetworkAddress]]  # Can be a host or network
     metricValue: Optional[int] = 1
     description: Optional[str]
     version: Optional[str]

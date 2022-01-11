@@ -13,6 +13,13 @@ class DuplicateObject(Exception):
         self.msg = msg
 
 
+class DuplicateStaticRoute(Exception):
+    """RTaise this exception when the API returns a 400 with a duplicate static route message"""
+
+    def __init__(self, msg):
+        self.msg = msg
+
+
 class HTTPWrapper(object):
     """This decorator class wraps all API calls from this client.
     All http requests are handled by this decorator to catch 401, 404, 422, and other errors.
@@ -49,6 +56,8 @@ class HTTPWrapper(object):
                     for msg in err_msg["error"]["messages"]:
                         if "Duplicate" in msg.get("description") or "already exists" in msg.get("description"):
                             raise DuplicateObject(msg.get("description"))
+                        elif "same interface and gateway in another route" in msg.get("description"):
+                            raise DuplicateStaticRoute(msg.get("description"))
                     raise
                 elif res.status_code == 401:
                     """Catch authentication errors"""

@@ -35,7 +35,7 @@ csfw_client = CSFWClient('192.168.1.30', "admin", "mypassword", verify=False)
 ```
 
 ## 2. Get the domain UUID
-The domain UUIDs that your user has access to are stored in `csfw_client.token["DOMAINS"]` and the domain uuid is
+The domain UUIDs that your user has access to are stored in `csfw_client.token["DOMAINS"]` and a domain UUID is
 required for most API calls.
 
 To set the domain UUID for the client instance, use the `get_domain_uuid` method.  
