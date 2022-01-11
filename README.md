@@ -5,7 +5,7 @@ This python library is intended to abstract the complexities of interacting with
 This library was developed and tested under python 3.10 and Cisco Secure Firewall Management Center Management center 7.1. Prior versions may work, but YMMV.
 
 # Installation
-1. (Optional) Create a python virtual environement. The below commands will create the venv in the existing directory `~/envs/` and activate it as the current python interpreter.
+1. (Optional) Create a python virtual environment. The below commands will create the venv in the existing directory `~/envs/` and activate it as the current python interpreter.
 ```
 python3 -m venv ~/envs/pycsfw && source ~/envs/pycsfw/bin/activate
 ```
@@ -24,10 +24,10 @@ $ pip list | grep pycsfw
 pycsfw             0.1.0     /Users/aahackne/Projects/test/pycsfw
 ```
 
-# Useage
+# Usage
 The sample and tests packages have a few examples that should give one a good idea of how to use this client.  
    
-## 1. Instantiate the Client and get a token
+## 1. Instantiate the client and get a token
 ```
 from pycsfw import CSFWClient
 
@@ -35,10 +35,10 @@ csfw_client = CSFWClient('192.168.1.30', "admin", "mypassword", verify=False)
 ```
 
 ## 2. Get the domain UUID
-The domain UUIDs that your token has access to are stored in `csfw_client.token["DOMAINS"]` and is required for almost
-every call you will make.  
+The domain UUIDs that your user has access to are stored in `csfw_client.token["DOMAINS"]` and the domain uuid is
+required for most API calls.
 
-To get the domain UUID for the domain you are wanting to make API calls against, use the `get_domain_uuid` method.  
+To set the domain UUID for the client instance, use the `get_domain_uuid` method.  
 
 In this example, I have a domain called "Customer A" that I want to work on. 
 The CSFW Manager will call this "Global/Customer A" (Customer A domain is a subset of the Global Domain).
