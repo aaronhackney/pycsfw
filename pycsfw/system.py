@@ -6,10 +6,8 @@ log = logging.getLogger(__name__)
 
 
 class System:
-    def get_fmc_domain_list(self, expanded: bool = True, offset: int = 0, limit: int = 999) -> list[DomainModel]:
+    def get_fmc_domain_list(self, expanded: bool = False, offset: int = 0, limit: int = 999) -> list[DomainModel]:
         """
-        :param domain_uuid: The UUID of the tenant we are working on
-        :param container_uuid: The UUID of the device we are working on
         :param expanded: Return additional details about the object
         :param offset: start on the nth record (useful for paging)
         :param limit: the maximum number of objectsdomain_uuid: str, container_uuid: str to return (useful for paging)
@@ -22,8 +20,8 @@ class System:
         if "items" in domains:
             return [DomainModel(**domain) for domain in domains["items"]]
 
-    def get_fmc_domain(self, domain_uuid, object_id):
-        domain = self.get(f"{self.PLATFORM_PREFIX}/api/fmc_platform/v1/info/domain/{domain_uuid}/{object_id}")
+    def get_fmc_domain(self, object_id):
+        domain = self.get(f"{self.PLATFORM_PREFIX}/api/fmc_platform/v1/info/domain/{self.domain_uuid}/{object_id}")
         if domain is not None:
             return DomainModel(**domain)
 

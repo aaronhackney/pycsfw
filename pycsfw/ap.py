@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 class AccessPolicies:
     def get_access_policy_list(
-        self, name: str = None, expanded: bool = True, offset: int = 0, limit: int = 999
+        self, name: str = None, expanded: bool = False, offset: int = 0, limit: int = 999
     ) -> list[FTDAccessPolicyModel]:
         """
         :param name: Filter the results with this policy name
@@ -77,7 +77,7 @@ class AccessPolicies:
             return FTDAccessPolicyModel(**deleted_access_policy)
 
     def get_access_rule_list(
-        self, ap_uuid: str, expanded: bool = True, offset: int = 0, limit: int = 999
+        self, ap_uuid: str, expanded: bool = False, offset: int = 0, limit: int = 999
     ) -> list[FTDAccessRuleModel]:
         """
         :param ap_uuid: The UUID of the FTDAccessPolicy that contains these rules. The "parent container"

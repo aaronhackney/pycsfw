@@ -28,17 +28,13 @@ class HTTPWrapper(object):
                 if res.status_code == 204:
                     # HTTP 204 No Content has no body to return. Only return the headers.
                     return res.headers
-                elif res.status_code == 200:
+                elif 200 <= res.status_code <= 299:
                     try:
                         # Test to see if there is a valid json response.
                         _res = res.json()
                     except ValueError:
                         # Not a json response (could be local file read or non json data)
                         return res
-                elif res.status_code == 422:
-                    res.raise_for_status()
-                elif res.status_code == 400:
-                    res.raise_for_status()
                 else:
                     res.raise_for_status()
                 return res.json()  # This should be a json response
@@ -57,7 +53,7 @@ class HTTPWrapper(object):
                 elif res.status_code == 401:
                     """Catch authentication errors"""
                     log.error(
-                        f"FMCHTTPWrapper called by {fn.__name__} - 401 Forbidden. Invalid token?: {err.response.text}"
+                        f"FMCHTTPWrapper called by {fn.__name__} - 401 Forbidden: Invalid token?: {err.response.text}"
                     )
                     raise
                 elif res.status_code == 403:
@@ -65,17 +61,16 @@ class HTTPWrapper(object):
                     log.error(f"FMCHTTPWrapper called by {fn.__name__} - 403 Forbidden: {err.response.text}")
                     raise
                 elif res.status_code == 404:
-                    log.error(
-                        f"FMCHTTPWrapper called by {fn.__name__} - We have called an endpoint path that is invalid: {err.response.text}"
-                    )
+                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - 404 Not Found: {err.response.text}")
                     raise
                 elif res.status_code == 405:
-                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - Unsupported: {err.response.text}")
+                    log.error(f"FMCHTTPWrapper called by {fn.__name__} - 405 Method Not Allowed: {err.response.text}")
                     log.error(err.response.text)
                     raise
                 elif res.status_code == 422:
                     log.error(
-                        f"FMCHTTPWrapper called by {fn.__name__} - We have provided invalid input: {err.response.text}"
+                        f"FMCHTTPWrapper called by {fn.__name__} - 422 Unprocessable Entity (Invalid Input):"
+                        "{err.response.text}"
                     )
                     log.error(err.response.text)
                     raise

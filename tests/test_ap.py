@@ -60,8 +60,9 @@ class TestFMCAccessPolicies(common.TestCommon):
         Test the "get list" operation for FTDAccessRules. This assumes that there is AT LEAST 1 access rule in the
         FMC default policy container.
         """
-        test_ap = self.csfw_client.get_access_policy_list(name=common.DEFAULT_ACCESS_CONTROL_POLICY)[0]
-        self.assertIsInstance(self.csfw_client.get_access_rule_list(test_ap.id), list)
+        ap_list = self.csfw_client.get_access_policy_list(name=common.DEFAULT_ACCESS_CONTROL_POLICY)[0]
+        rule_list = self.csfw_client.get_access_rule_list(ap_list.id, expanded=True)
+        [self.assertIsInstance(rule, FTDAccessRuleModel) for rule in rule_list]
 
     def test_get_access_rule(self):
         """Test the read operation for FTDAccessRule"""

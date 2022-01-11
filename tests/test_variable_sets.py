@@ -17,13 +17,10 @@ class TestFMCVariableSets(common.TestCommon):
         self.common_setup()
 
     def test_get_fmc_network_object_list(self):
-        self.assertTrue(
-            self.csfw_client.get_fmc_variable_set_list(self.domain_uuid)[0]["name"].__contains__("Default-Set")
-        )
+        self.assertTrue(self.csfw_client.get_fmc_variable_set_list()[0].name.__contains__("Default-Set"))
 
     def test_get_fmc_variable_set_list(self):
-        passed = False
-        variable_sets = self.csfw_client.get_fmc_variable_set_list(self.domain_uuid)
+        variable_sets = self.csfw_client.get_fmc_variable_set_list()
         default_var_set_list = list(filter(lambda x: "Default-Set" == x.name, variable_sets))
-        default_var_set = self.csfw_client.get_fmc_variable_set(self.domain_uuid, default_var_set_list[0].id)
+        default_var_set = self.csfw_client.get_fmc_variable_set(default_var_set_list[0].id)
         self.assertIsInstance(default_var_set, VariableSetModel)

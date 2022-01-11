@@ -33,7 +33,7 @@ class TestFMCInterfaces(common.TestCommon):
             sub_iface = self.csfw_client.create_ftd_subiface(self.device.id, common.SUB_IFACE_CONFIG)
         except DuplicateObject as ex:
             log.warning("Test Sub-Interface already existed...continuing...")
-            sub_iface_list = self.csfw_client.get_ftd_subiface_list(self.device.id)
+            sub_iface_list = self.csfw_client.get_ftd_subiface_list(self.device.id, expanded=True)
             found_iface_list = [siface for siface in sub_iface_list if siface.vlanId == common.SUB_IFACE_CONFIG.vlanId]
             if found_iface_list:
                 sub_iface = found_iface_list[0]
@@ -67,19 +67,21 @@ class TestFMCInterfaces(common.TestCommon):
         self.assertIsInstance(iface, FTDPhysicalInterfaceModel)
 
     def test_update_phys_interface(self):
-        iface = self.csfw_client.get_ftd_physical_iface_by_name(self.device.id, common.TEST_PHYSICAL_IFACE_CONFIG.name)
+        iface = self.csfw_client.get_ftd_physical_iface_by_name(
+            self.device.id, common.TEST_PHYSICAL_IFACE_CONFIG.name, expanded=True
+        )
         original_iface = iface.copy()
         iface.ifname = f"updated-{iface.ifname}"
         updated_iface = self.csfw_client.update_ftd_physical_iface(self.device.id, iface)
         self.assertIsInstance(updated_iface, FTDPhysicalInterfaceModel)
         self.assertNotEquals(updated_iface.ifname, original_iface.ifname)
 
-    def test_get_vlan_interfaces_list(self):
-        """
-        Test getting a list of vlan interface objects
-        Note: not all devices support vlan interfaces - may fail with an http status code 405 - Unsupported
-        """
-        self.assertIsNotNone(self.csfw_client.get_ftd_vlan_iface_list(self.device.id))
+    # def test_get_vlan_interfaces_list(self):
+    #     """
+    #     Test getting a list of vlan interface objects
+    #     Note: not all devices support vlan interfaces - may fail with an http status code 405 - Unsupported
+    #     """
+    #     self.assertIsNotNone(self.csfw_client.get_ftd_vlan_iface_list(self.device.id, expanded=True))
 
     def test_get_sub_iface_list(self):
         """Test getting a list of all sub interterfaces"""

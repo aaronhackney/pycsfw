@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 class Devices:
     """This class is for manipulating sensors (devices) managed by an FMC."""
 
-    def get_device_records_list(self, expanded: bool = True, offset: int = 0, limit: int = 999):
+    def get_device_records_list(self, expanded: bool = False, offset: int = 0, limit: int = 999):
         """
         :param expanded: return extra data on each record
         :param offset: select the records starting at the offset value (paging)

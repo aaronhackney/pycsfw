@@ -1,5 +1,5 @@
-# pycsfw - Cisco Secure Firewall Client
-This library is intended to abstract the complexities of interacting with the Cisco Secure Firewall Management Center via API.
+# Cisco Secure Firewall SDK
+This python library is intended to abstract the complexities of interacting with the Cisco Secure Firewall Management Center via API.
 
 # Requirements
 This library was developed and tested under python 3.10 and Cisco Secure Firewall Management Center Management center 7.1. Prior versions may work, but YMMV.
@@ -32,7 +32,6 @@ The sample and tests packages have a few examples that should give one a good id
 from pycsfw import CSFWClient
 
 csfw_client = CSFWClient('192.168.1.30', "admin", "mypassword", verify=False)
-csfw_client.get_auth_token()
 ```
 
 ## 2. Get the domain UUID
@@ -44,12 +43,19 @@ To get the domain UUID for the domain you are wanting to make API calls against,
 In this example, I have a domain called "Customer A" that I want to work on. 
 The CSFW Manager will call this "Global/Customer A" (Customer A domain is a subset of the Global Domain).
 ```
-domain_uuid = csfw_client.get_domain_uuid("Global/Customer A")
+csfw_client.get_domain_uuid("Global/Customer A")
+```
+
+If you need to identify the domain name at runtime, you can enumerate all domains from the firewall manager using 
+`csfw_client.get_fmc_domain_list()`
+```
+domains = csfw_client.get_fmc_domain_list()
+```
 
 ## 3. Use one of the methods to get information from the management center. See sample/get_interfaces.py
 ```
-zone_list = csfw_client.get_security_zones_list(domain_uuid)
-
+zone_list = csfw_client.get_security_zones_list()
+```
 ## 4. The data is represented using pydantic dataclass objects (see models.py)  
 If you want to use the objects like regular dictionaries for logging, printing, etc, 
 you can treat the objects like a dictionary using pydantic's built in .dict() method

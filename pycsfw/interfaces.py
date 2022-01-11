@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 class Interfaces:
     def get_ftd_physical_iface_list(
-        self, container_uuid: str, expanded: bool = True, offset: int = 0, limit: int = 999
+        self, container_uuid: str, expanded: bool = False, offset: int = 0, limit: int = 999
     ) -> list[FTDPhysicalInterfaceModel]:
         """
         :param container_uuid: The UUID of the device we are working on
@@ -26,14 +26,16 @@ class Interfaces:
             )["items"]
         ]
 
-    def get_ftd_physical_iface_by_name(self, container_uuid: str, iface_name: str) -> FTDPhysicalInterfaceModel:
+    def get_ftd_physical_iface_by_name(
+        self, container_uuid: str, iface_name: str, expanded: bool = False
+    ) -> FTDPhysicalInterfaceModel:
         """
         :param container_uuid: The UUID of the device we are working on
         :param iface_name: The name of the intrface to retrieve. eg: GigabitEthernet0/4
         :return: FTDPhysicalInterface object
         :rtype: FTDPhysicalInterface (see models.py)
         """
-        iface_list = self.get_ftd_physical_iface_list(container_uuid)
+        iface_list = self.get_ftd_physical_iface_list(container_uuid, expanded=expanded)
         found_iface = [iface for iface in iface_list if iface.name == iface_name]
         if found_iface:
             return found_iface[0]
@@ -70,7 +72,7 @@ class Interfaces:
         pass
 
     def get_ftd_vlan_iface_list(
-        self, container_uuid: str, expanded: bool = True, offset: int = 0, limit: int = 999
+        self, container_uuid: str, expanded: bool = False, offset: int = 0, limit: int = 999
     ) -> list:
         """
         :param container_uuid: The UUID of the device we are working on
@@ -97,7 +99,7 @@ class Interfaces:
         )
 
     def get_ftd_subiface_list(
-        self, container_uuid: str, expanded: bool = True, offset: int = 0, limit: int = 999
+        self, container_uuid: str, expanded: bool = False, offset: int = 0, limit: int = 999
     ) -> list[FTDSubInterfaceModel]:
         """
         :param container_uuid: The UUID of the device we are working on

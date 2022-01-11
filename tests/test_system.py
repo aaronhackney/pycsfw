@@ -1,5 +1,6 @@
 import logging
 import common
+from pycsfw.models import DomainModel, FMCServerVersionModel
 
 log = logging.getLogger()
 log.setLevel(common.LOG_LEVEL)
@@ -14,7 +15,17 @@ class TestFMCSystem(common.TestCommon):
         self.common_setup()
 
     def test_get_domain_list(self):
-        self.assertIsInstance(self.csfw_client.get_fmc_domain_list(), list)
+        domains = self.csfw_client.get_fmc_domain_list()
+        if domains:
+            [self.assertIsInstance(domain, DomainModel) for domain in domains]
+        else:
+            log.error("There were no domains found.")
+            self.assertTrue(False)
 
     def test_get_fmc_version_list(self):
-        self.assertIsInstance(self.csfw_client.get_fmc_version_list(), list)
+        versions = self.csfw_client.get_fmc_version_list()
+        if versions:
+            [self.assertIsInstance(version, FMCServerVersionModel) for version in versions]
+        else:
+            log.error("There were no versions found.")
+            self.assertTrue(False)

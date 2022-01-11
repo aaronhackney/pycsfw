@@ -284,14 +284,14 @@ class StaticRouteModel(BaseModel):
     metadata: Optional[dict]
     links: Optional[dict]
     routeTracking: Optional[ISLAMonitorModel]
-    selectedNetworks: list[dict]
-    metricValue: int = 1
+    selectedNetworks: Optional[list[dict]]
+    metricValue: Optional[int] = 1
     description: Optional[str]
     version: Optional[str]
     name: Optional[str]
     isTunneled: Optional[bool]
-    interfaceName: str = "outside"
-    gateway: dict
+    interfaceName: Optional[str]
+    gateway: Optional[dict]
 
 
 class IPv4StaticRouteModel(StaticRouteModel):
