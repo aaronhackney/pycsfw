@@ -1,5 +1,5 @@
 import json
-from pycsfw import CSFWClient, interfaces
+from pycsfw import CSFWClient
 
 
 def main():
