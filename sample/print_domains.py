@@ -7,7 +7,7 @@ def main():
     csfw_client = CSFWClient("172.30.4.125", "admin", "P@$$w0rd1!", verify=False)
 
     # Get a list of all domains on this management system
-    domains = csfw_client.get_fmc_domain_list()
+    domains = csfw_client.get_csfmc_domain_list()
 
     if domains:
         for domain in domains:

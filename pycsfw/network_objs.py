@@ -1,5 +1,5 @@
 import logging
-from .models import HostObjectModel, NetworkObjectModel
+from .models import HostObjectModel, NetworkObjectModel, NetworkGroupModel
 
 log = logging.getLogger(__name__)
 
@@ -181,4 +181,65 @@ class NetworkObjects:
         """
         return HostObjectModel(
             **self.delete(f"{self.CONFIG_PREFIX}/domain/{self.domain_uuid}/object/hosts/{host_obj_id}")
+        )
+
+    def get_network_groups_list(
+        self, expanded: bool = False, offset: int = 0, limit: int = 999, filter: str = None
+    ) -> list[NetworkGroupModel]:
+        """
+        :param expanded: Return additional details about the object groups
+        :param offset: start on the nth record (useful for paging)
+        :param limit: the maximum number of groups to return (useful for paging)
+        :param filter: search for name and value  "unusedOnly:true" or "nameOrValue:[search str]"
+        :return: list of NetworkGroupModel objects (see models.py)
+        :rtype: list[NetworkGroupModel]
+        """  # /api/fmc_config/v1
+        network_grps = self.get(
+            f"{self.CONFIG_PREFIX}/domain/{self.domain_uuid}/object/networkgroups",
+            params={"offset": offset, "limit": limit, "expanded": expanded, "filter": filter},
+        )
+        if "items" in network_grps:
+            return [NetworkGroupModel(**network_grp) for network_grp in network_grps["items"]]
+
+    def get_network_group(self, network_group_id: str, override_target_id: str = None) -> NetworkGroupModel:
+        """
+        :param network_group_id: the id of the network group to return
+        :param override_target_id: Retrieves the override(s) associated with the host object on given target ID.
+        :return: newtwork group with the given id
+        :rtype: NetworkGroupModel
+        """
+        return NetworkGroupModel(
+            **self.get(
+                f"{self.CONFIG_PREFIX}/domain/{self.domain_uuid}/object/networkgroups/{network_group_id}",
+                params={"overrideTargetId": override_target_id},
+            )
+        )
+
+    def create_network_group(self, network_grp: NetworkGroupModel) -> NetworkGroupModel:
+        """
+        :network_grp: A list of the HostObjectModel objects we wish to create
+        :return: NetworkGroupModel object
+        :rtype: NetworkGroupModel
+        """
+        new_obj_list = []
+        for obj in network_grp.objects:
+            new_obj_list.append({"id": obj.id, "type": obj.type})
+        network_grp.objects = new_obj_list
+        return NetworkGroupModel(
+            **self.post(
+                f"{self.CONFIG_PREFIX}/domain/{self.domain_uuid}/object/networkgroups",
+                data=network_grp.dict(exclude_unset=True),
+            )
+        )
+
+    def delete_network_group(self, network_group_id: str) -> NetworkGroupModel:
+        """
+        :param network_group_id: the id of the network group to return
+        :return: NetworkGroupModel of the group we deleted
+        :rtype: NetworkGroupModel
+        """
+        return NetworkGroupModel(
+            **self.delete(
+                f"{self.CONFIG_PREFIX}/domain/{self.domain_uuid}/object/networkgroups/{network_group_id}",
+            )
         )

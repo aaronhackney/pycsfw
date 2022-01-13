@@ -9,12 +9,21 @@ log = logging.getLogger(__name__)
 
 
 class DuplicateObject(Exception):
+    """Raise this exception when the API returns a 400 a duplicate object was attempted to be created"""
+
     def __init__(self, msg):
         self.msg = msg
 
 
 class DuplicateStaticRoute(Exception):
-    """RTaise this exception when the API returns a 400 with a duplicate static route message"""
+    """Raise this exception when the API returns a 400 with a duplicate static route message"""
+
+    def __init__(self, msg):
+        self.msg = msg
+
+
+class RateLimitException(Exception):
+    """Raise this exception when the API returns a 429 indicating we have been rate limited."""
 
     def __init__(self, msg):
         self.msg = msg
@@ -83,6 +92,13 @@ class HTTPWrapper(object):
                     )
                     log.error(err.response.text)
                     raise
+                elif res.status_code == 429:
+                    log.error(
+                        "We have been rate-limited by the Firewall Manager. (Default is  120 messages per minute from an"
+                        "individual IP address"
+                    )
+                    raise RateLimitException("API rate limit exceeded.")
+
                 else:
                     log.error(f"FMCHTTPWrapper called by {fn.__name__} - HTTP Error returned: {err.response.text}")
                     raise
@@ -104,7 +120,7 @@ class BaseClient(object):
         ip: str,
         username: str,
         password: str,
-        verify: bool = True,
+        verify: str = None,
         port: str = None,
         timeout: int = 30,
     ) -> None:
@@ -112,13 +128,13 @@ class BaseClient(object):
         :param ip: The IP of the Cisco Secure Firewall Management Center
         :param username: The username for the CSFMC
         :param password: The password for the CSFMC
-        :param verify: Enable or disable TLS/SSL Certificate Checking when accessing the CSFMC API (Default=True)
+        :param verify: path to the CA certificate for the CA you want to use for certificate validation
         :param port: The port that the CSFMC API is listening on (Default = 443)
         :param timeout: TCP timeout when attempting to reach the CSFMC API
         """
         self.port = str(port) if port else None
         self.base_url = f"https://{ip}:{self.port}" if port else f"https://{ip}"
-        self.verify = verify  # allow API self-signed certs * DANGER *
+        self.verify = verify
         self.timeout = timeout
         self.username = username
         self.password = password

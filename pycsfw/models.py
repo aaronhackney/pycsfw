@@ -312,3 +312,18 @@ class IPv4StaticRouteModel(StaticRouteModel):
 
 class IPv6StaticRouteModel(StaticRouteModel):
     type: str = "IPv6StaticRoute"
+
+
+class NetworkGroupModel(BaseModel):
+    id: Optional[str]
+    name: Optional[str]
+    description: Optional[str]
+    objects: Optional[list[INetworkAddress]]
+    metadata: Optional[dict]
+    literals: Optional[list]
+    overridable: Optional[bool]
+    links: Optional[dict]
+    overrides: Optional[dict]
+    version: Optional[str]
+    overrideTargetId: Optional[str]
+    type: str = "NetworkGroup"

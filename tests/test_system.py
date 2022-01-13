@@ -15,7 +15,7 @@ class TestFMCSystem(common.TestCommon):
         self.common_setup()
 
     def test_get_domain_list(self):
-        domains = self.csfw_client.get_fmc_domain_list()
+        domains = self.csfw_client.get_csfmc_domain_list()
         if domains:
             [self.assertIsInstance(domain, DomainModel) for domain in domains]
         else:
@@ -23,7 +23,7 @@ class TestFMCSystem(common.TestCommon):
             self.assertTrue(False)
 
     def test_get_fmc_version_list(self):
-        versions = self.csfw_client.get_fmc_version_list()
+        versions = self.csfw_client.get_csfmc_version_list()
         if versions:
             [self.assertIsInstance(version, FMCServerVersionModel) for version in versions]
         else:

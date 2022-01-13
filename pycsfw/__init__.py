@@ -27,5 +27,5 @@ class CSFWClient(
     SecurityZone,
     StaticRoutes,
 ):
-    def __init__(self, ftd_ip: str, username: str, password: str, verify: bool = True, timeout: int = 30, port=None):
+    def __init__(self, ftd_ip: str, username: str, password: str, verify: str = None, timeout: int = 30, port=None):
         BaseClient.__init__(self, ftd_ip, username, password, verify, port=port, timeout=timeout)

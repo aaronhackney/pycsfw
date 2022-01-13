@@ -103,17 +103,14 @@ class TestCommon(TestCase):
     These test run against an actual FMC device.
     See the common.py for the def setUp(self) method
     Set your FMC IP, Username and password using bash variables FMCIP, FMCUSER, and FMCPASS
-    Note: If you want to DISABLE TLS certificate verification, add VERIFY=False to your .env or env varaibles
-          If you want to enforce TLS certificate validation just omit VERIFY from your environment variables
     """
 
     def common_setup(self):
-        self.verify = getenv("VERIFY", "True").lower() in ("false", "0", "f")
+        self.verify = environ.get("VERIFY")
         self.ftd_ip = environ.get("FMCIP")
         self.username = environ.get("FMCUSER")
         self.password = environ.get("FMCPASS")
         self.csfw_client = CSFWClient(self.ftd_ip, self.username, self.password, verify=self.verify)
-        self.csfw_client.get_auth_token()
         self.assertIsNotNone(self.csfw_client.token)
         self.csfw_client.get_domain_uuid(TEST_DOMAIN)
         self.device = self.get_test_device(self.csfw_client.get_device_records_list())

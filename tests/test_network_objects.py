@@ -2,7 +2,7 @@ import time
 import logging
 import common
 from pycsfw.base import DuplicateObject
-from pycsfw.models import NetworkObjectModel, HostObjectModel
+from pycsfw.models import NetworkGroupModel, NetworkObjectModel, HostObjectModel
 
 log = logging.getLogger()
 log.setLevel(common.LOG_LEVEL)
@@ -120,3 +120,26 @@ class TestFMCNetworkObjects(common.TestCommon):
         host_obj.name = f"{host_obj.name}-updated"
         new_obj = self.csfw_client.update_host_object(host_obj)
         self.assertEquals(new_obj.name, f"{host_obj.name}")
+
+    def test_get_network_groups_list(self):
+        network_grps = self.csfw_client.get_network_groups_list(expanded=True)
+        for network_grp in network_grps:
+            self.assertIsInstance(network_grp, NetworkGroupModel)
+
+    def test_get_network_group(self):
+        network_grps = self.csfw_client.get_network_groups_list(expanded=True)
+        network_group = self.csfw_client.get_network_group(network_grps[0].id)
+        self.assertIsInstance(network_group, NetworkGroupModel)
+
+    def test_create_network_group(self):
+        net_objs = self.csfw_client.create_bulk_network_objects([common.NET_OBJ_1, common.NET_OBJ_2])
+        network_grp = NetworkGroupModel(
+            **{
+                "name": "test-network-group-1",
+                "description": "Test network group number uno",
+                "objects": net_objs,
+                "type": "NetworkGroup",
+            }
+        )
+        new_network_grp = self.csfw_client.create_network_group(network_grp)
+        self.assertIsInstance(new_network_grp, NetworkGroupModel)

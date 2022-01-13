@@ -18,6 +18,7 @@ to-refactor
 .env.production.local
 .eslintcache
 .env
+.csv
 logs/
 
 npm-debug.log*
