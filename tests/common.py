@@ -6,6 +6,7 @@ from pycsfw.models import (
     FTDDeviceModel,
     HostObjectModel,
     NetworkObjectModel,
+    NetworkGroupModel,
 )
 from unittest import TestCase
 import logging
@@ -72,6 +73,14 @@ HOST_OBJ_2 = HostObjectModel(
     }
 )
 
+NET_GROUP_1 = NetworkGroupModel(
+    **{
+        "name": "test-network-group-1",
+        "description": "Test network group number uno",
+        "objects": None,
+        "type": "NetworkGroup",
+    }
+)
 
 TEST_ACCESS_POLICY = FTDAccessPolicyModel(
     **{

@@ -14,6 +14,14 @@ class NetworkObjects:
             serializable_objs.append(obj_list[i].dict(exclude_unset=True))
         return serializable_objs
 
+    def _minimize_objects(self, obj_list: list):
+        """
+        Given a list of objects, return a new list with just the objectId and the ObjectType
+        """
+        minimized = list()
+        [minimized.append({"id": obj.id, "type": obj.type}) for obj in obj_list]
+        return minimized
+
     def get_network_objects_list(
         self, expanded: bool = False, offset: int = 0, limit: int = 999, filter: str = None
     ) -> list[NetworkObjectModel]:
@@ -217,17 +225,32 @@ class NetworkObjects:
 
     def create_network_group(self, network_grp: NetworkGroupModel) -> NetworkGroupModel:
         """
-        :network_grp: A list of the HostObjectModel objects we wish to create
+        :network_grp: The NetworkGroupModel object we wish to create
         :return: NetworkGroupModel object
         :rtype: NetworkGroupModel
         """
-        new_obj_list = []
-        for obj in network_grp.objects:
-            new_obj_list.append({"id": obj.id, "type": obj.type})
-        network_grp.objects = new_obj_list
+        # For network groups we only need the object ID and type. Minimize those objects to bare essentials.
+        network_grp.objects = self._minimize_objects(network_grp.objects)
+
         return NetworkGroupModel(
             **self.post(
                 f"{self.CONFIG_PREFIX}/domain/{self.domain_uuid}/object/networkgroups",
+                data=network_grp.dict(exclude_unset=True),
+            )
+        )
+
+    def update_network_group(self, network_grp: NetworkGroupModel) -> NetworkGroupModel:
+        """
+        :network_grp: The NetworkGroupModel object we wish to modify
+        :return: NetworkGroupModel object
+        :rtype: NetworkGroupModel
+        """
+        # For network groups we only need the object ID and type. Minimize those objects to bare essentials.
+        network_grp.objects = self._minimize_objects(network_grp.objects)
+
+        return NetworkGroupModel(
+            **self.put(
+                f"{self.CONFIG_PREFIX}/domain/{self.domain_uuid}/object/networkgroups/{network_grp.id}",
                 data=network_grp.dict(exclude_unset=True),
             )
         )

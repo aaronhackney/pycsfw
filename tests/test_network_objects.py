@@ -1,7 +1,7 @@
 import time
 import logging
 import common
-from pycsfw.base import DuplicateObject
+from pycsfw.base import DuplicateObject, ObjectDeletionRestricted
 from pycsfw.models import NetworkGroupModel, NetworkObjectModel, HostObjectModel
 
 log = logging.getLogger()
@@ -15,24 +15,37 @@ class TestFMCNetworkObjects(common.TestCommon):
     def setUp(self) -> None:
         """Create the FMCClient instance and other common setup tasks"""
         self.common_setup()
+
+        # Delete any artifcats of old, failed tests
+        self.delete_test_network_groups()
         self.delete_test_network_objs()
         self.delete_test_host_objects()
 
     def tearDown(self) -> None:
+        """Delete any artifcats of of our testing"""
+        self.delete_test_network_groups()
         self.delete_test_network_objs()
         self.delete_test_host_objects()
 
+    ###################################################################
+    # Common functions for testing network objects and network groups
     def delete_test_network_objs(self) -> None:
         """Delete the network objects that may have been created for testing purposes"""
-        obj_list = self.csfw_client.get_network_objects_list(filter="nameOrValue:unittest-network-")
-        if obj_list:
-            [self.csfw_client.delete_network_object(obj.id) for obj in obj_list]
+        try:
+            obj_list = self.csfw_client.get_network_objects_list(filter="nameOrValue:unittest-network-")
+            if obj_list:
+                [self.csfw_client.delete_network_object(obj.id) for obj in obj_list]
+        except ObjectDeletionRestricted:
+            log.error("We are trying to delete a network-object while it is still referenced in a network-group")
 
     def delete_test_host_objects(self):
         """Delete the host objects that may have been created for testing purposes"""
-        host_list = self.csfw_client.get_host_objects_list(filter="nameOrValue:unittest-host-")
-        if host_list:
-            [self.csfw_client.delete_host_object(host.id) for host in host_list]
+        try:
+            host_list = self.csfw_client.get_host_objects_list(filter="nameOrValue:unittest-host-")
+            if host_list:
+                [self.csfw_client.delete_host_object(host.id) for host in host_list]
+        except ObjectDeletionRestricted:
+            log.error("We are trying to delete a network-object while it is still referenced in a network-group")
 
     def create_test_objects(self):
         try:
@@ -42,6 +55,19 @@ class TestFMCNetworkObjects(common.TestCommon):
             log.warning("Objects already exist. Continuing...")
         time.sleep(3)  # Give the maanger time to create the devices before we attempt to retrieve them....
 
+    def delete_test_network_groups(self):
+        net_groups = self.csfw_client.get_network_groups_list(filter="nameOrValue:test-network-group-1", expanded=True)
+        if net_groups:
+            for net_grp in net_groups:
+                self.csfw_client.delete_network_group(net_grp.id)
+
+    def create_test_network_group(self):
+        network_grp = common.NET_GROUP_1
+        network_grp.objects = self.csfw_client.create_bulk_network_objects([common.NET_OBJ_1, common.NET_OBJ_2])
+        self.csfw_client.create_network_group(network_grp)
+
+    ###################################################################
+    # Actual unittests
     def test_get_network_object_list(self) -> None:
         self.create_test_objects()
         network_objs = self.csfw_client.get_network_objects_list()
@@ -132,14 +158,27 @@ class TestFMCNetworkObjects(common.TestCommon):
         self.assertIsInstance(network_group, NetworkGroupModel)
 
     def test_create_network_group(self):
-        net_objs = self.csfw_client.create_bulk_network_objects([common.NET_OBJ_1, common.NET_OBJ_2])
-        network_grp = NetworkGroupModel(
-            **{
-                "name": "test-network-group-1",
-                "description": "Test network group number uno",
-                "objects": net_objs,
-                "type": "NetworkGroup",
-            }
-        )
+        network_grp = common.NET_GROUP_1
+        network_grp.objects = self.csfw_client.create_bulk_network_objects([common.NET_OBJ_1, common.NET_OBJ_2])
         new_network_grp = self.csfw_client.create_network_group(network_grp)
         self.assertIsInstance(new_network_grp, NetworkGroupModel)
+
+    def test_modify_network_group(self):
+        self.create_test_network_group()
+        time.sleep(3)  # Give the CSFMC time to update the new records...
+        net_objs = self.csfw_client.get_network_groups_list(filter="nameOrValue:test-network-group-", expanded=True)
+        original_object_list_length = len(net_objs[0].objects)
+        if len(net_objs[0].objects) > 1:
+            net_objs[0].objects.pop()
+        updated_net_obj = self.csfw_client.update_network_group(net_objs[0])
+        self.assertIsInstance(updated_net_obj, NetworkGroupModel)
+        self.assertLess(len(updated_net_obj.objects), original_object_list_length)
+
+    def test_delete_network_group(self):
+        self.create_test_network_group()
+        time.sleep(3)  # Give the CSFMC time to update the new records...
+        network_grps = self.csfw_client.get_network_groups_list(
+            filter="nameOrValue:test-network-group-1", expanded=True
+        )
+        for network_grp in network_grps:
+            self.assertIsInstance(self.csfw_client.delete_network_group(network_grp.id), NetworkGroupModel)

@@ -22,8 +22,15 @@ class DuplicateStaticRoute(Exception):
         self.msg = msg
 
 
-class RateLimitException(Exception):
+class RateLimitExceeded(Exception):
     """Raise this exception when the API returns a 429 indicating we have been rate limited."""
+
+    def __init__(self, msg):
+        self.msg = msg
+
+
+class ObjectDeletionRestricted(Exception):
+    """When deleting a network object group, if the group still has members, the delete operaton will fail."""
 
     def __init__(self, msg):
         self.msg = msg
@@ -67,6 +74,8 @@ class HTTPWrapper(object):
                             raise DuplicateObject(msg.get("description"))
                         elif "same interface and gateway in another route" in msg.get("description"):
                             raise DuplicateStaticRoute(msg.get("description"))
+                        elif "Object deletion restricted" in msg.get("description"):
+                            raise ObjectDeletionRestricted(msg.get("description"))
                     raise
                 elif res.status_code == 401:
                     """Catch authentication errors"""
@@ -97,7 +106,7 @@ class HTTPWrapper(object):
                         "We have been rate-limited by the Firewall Manager. (Default is  120 messages per minute from an"
                         "individual IP address"
                     )
-                    raise RateLimitException("API rate limit exceeded.")
+                    raise RateLimitExceeded("API rate limit exceeded.")
 
                 else:
                     log.error(f"FMCHTTPWrapper called by {fn.__name__} - HTTP Error returned: {err.response.text}")
