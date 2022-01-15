@@ -57,9 +57,12 @@ class TestFMCNetworkObjects(common.TestCommon):
 
     def delete_test_network_groups(self):
         net_groups = self.csfw_client.get_network_groups_list(filter="nameOrValue:test-network-group-1", expanded=True)
-        if net_groups:
-            for net_grp in net_groups:
-                self.csfw_client.delete_network_group(net_grp.id)
+        try:
+            if net_groups:
+                for net_grp in net_groups:
+                    self.csfw_client.delete_network_group(net_grp.id)
+        except ObjectDeletionRestricted:
+            log.error("We are trying to delete a network-group while it is still referenced in another network-group")
 
     def create_test_network_group(self):
         network_grp = common.NET_GROUP_1

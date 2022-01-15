@@ -279,7 +279,7 @@ class IHostObjectContainer(BaseModel):
     object: Optional[HostObjectModel]
 
 
-class INetworkAddress(BaseModel):  # this can be a host object or a network object
+class INetworkAddress(BaseModel):  # this can be a host object, a network object, or a network group object
     metadata: Optional[dict]
     overridable: Optional[bool]
     name: Optional[str]

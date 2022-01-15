@@ -266,3 +266,6 @@ class NetworkObjects:
                 f"{self.CONFIG_PREFIX}/domain/{self.domain_uuid}/object/networkgroups/{network_group_id}",
             )
         )
+
+
+# TODO: Deal with nested groups...
