@@ -1,26 +1,14 @@
 import logging
 from .models import HostObjectModel, NetworkObjectModel, NetworkGroupModel
+from urllib.parse import urlparse, parse_qsl
 
 log = logging.getLogger(__name__)
 
+# TODO: refactor the get list method to return the entire payload not just items.
+
 
 class NetworkObjects:
-    """Class to call the FMC API Endpoint for Network and Host Objects"""
-
-    def _serialize_objects(self, obj_list: list) -> list:
-        serializable_objs = []
-        for i, net_obj in enumerate(obj_list):
-            obj_list[i].metadata = None
-            serializable_objs.append(obj_list[i].dict(exclude_unset=True))
-        return serializable_objs
-
-    def _minimize_objects(self, obj_list: list):
-        """
-        Given a list of objects, return a new list with just the objectId and the ObjectType
-        """
-        minimized = list()
-        [minimized.append({"id": obj.id, "type": obj.type}) for obj in obj_list]
-        return minimized
+    """Class to call the FMC API Endpoint for Network and Host Objects and Groups"""
 
     def get_network_objects_list(
         self, expanded: bool = False, offset: int = 0, limit: int = 999, filter: str = None
@@ -122,7 +110,11 @@ class NetworkObjects:
             params={"offset": offset, "limit": limit, "expanded": expanded, "filter": filter},
         )
         if "items" in host_objs:
-            return [HostObjectModel(**host_object) for host_object in host_objs["items"]]
+            return_data = [HostObjectModel(**host_object) for host_object in host_objs["items"]]
+            if host_objs["paging"]["pages"] > 1:  # There could be many pages of data
+                paged_data = self._get_all_pages(host_objs["paging"])
+                return_data.extend([HostObjectModel(**host_object) for host_object in paged_data])
+            return return_data
 
     def get_host_object(self, host_obj_id: str, override_target_id: str = None) -> HostObjectModel:
         """
@@ -266,6 +258,45 @@ class NetworkObjects:
                 f"{self.CONFIG_PREFIX}/domain/{self.domain_uuid}/object/networkgroups/{network_group_id}",
             )
         )
+
+    def _get_all_pages(self, paging: dict) -> list:
+        """
+        Given returned dataset paging information, extract the remaining pages of data from the API
+        :param paging: The paging data returned by the CSFMC API
+        :return: a list of network objects
+        :rtype: list
+        """
+        return_data = []
+        for api_call in paging["next"]:
+            url_parts = urlparse(api_call)
+            query_parts = dict(parse_qsl(url_parts.query))
+            net_objs = self.get(
+                f"{url_parts.path}",
+                params={
+                    "offset": query_parts.get("offset", None),
+                    "limit": query_parts.get("limit", None),
+                    "expanded": query_parts.get("expanded", None),
+                    "filter": query_parts.get("filter", None),
+                },
+            )
+            if "items" in net_objs:
+                return_data.extend(net_objs["items"])
+        return return_data
+
+    def _serialize_objects(self, obj_list: list) -> list:
+        serializable_objs = []
+        for i, net_obj in enumerate(obj_list):
+            obj_list[i].metadata = None
+            serializable_objs.append(obj_list[i].dict(exclude_unset=True))
+        return serializable_objs
+
+    def _minimize_objects(self, obj_list: list):
+        """
+        Given a list of objects, return a new list with just the objectId and the ObjectType
+        """
+        minimized = list()
+        [minimized.append({"id": obj.id, "type": obj.type}) for obj in obj_list]
+        return minimized
 
 
 # TODO: Deal with nested groups...

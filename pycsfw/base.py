@@ -4,36 +4,37 @@ from json import loads
 from functools import wraps
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import HTTPError
+from .exceptions import DuplicateObject, DuplicateStaticRoute, RateLimitExceeded, ObjectDeletionRestricted
 
 log = logging.getLogger(__name__)
 
 
-class DuplicateObject(Exception):
-    """Raise this exception when the API returns a 400 a duplicate object was attempted to be created"""
-
-    def __init__(self, msg):
-        self.msg = msg
-
-
-class DuplicateStaticRoute(Exception):
-    """Raise this exception when the API returns a 400 with a duplicate static route message"""
-
-    def __init__(self, msg):
-        self.msg = msg
-
-
-class RateLimitExceeded(Exception):
-    """Raise this exception when the API returns a 429 indicating we have been rate limited."""
-
-    def __init__(self, msg):
-        self.msg = msg
-
-
-class ObjectDeletionRestricted(Exception):
-    """When deleting a network object group, if the group still has members, the delete operaton will fail."""
-
-    def __init__(self, msg):
-        self.msg = msg
+# class DuplicateObject(Exception):
+#     """Raise this exception when the API returns a 400 a duplicate object was attempted to be created"""
+#
+#     def __init__(self, msg):
+#         self.msg = msg
+#
+#
+# class DuplicateStaticRoute(Exception):
+#     """Raise this exception when the API returns a 400 with a duplicate static route message"""
+#
+#     def __init__(self, msg):
+#         self.msg = msg
+#
+#
+# class RateLimitExceeded(Exception):
+#     """Raise this exception when the API returns a 429 indicating we have been rate limited."""
+#
+#     def __init__(self, msg):
+#         self.msg = msg
+#
+#
+# class ObjectDeletionRestricted(Exception):
+#     """When deleting a network object group, if the group still has members, the delete operaton will fail."""
+#
+#     def __init__(self, msg):
+#         self.msg = msg
 
 
 class HTTPWrapper(object):
@@ -103,8 +104,8 @@ class HTTPWrapper(object):
                     raise
                 elif res.status_code == 429:
                     log.error(
-                        "We have been rate-limited by the Firewall Manager. (Default is  120 messages per minute from an"
-                        "individual IP address"
+                        "We have been rate-limited by the Firewall Manager. (Default is 120 messages per minute from"
+                        "an individual IP address. We are pausing requests for 30 seconds..."
                     )
                     raise RateLimitExceeded("API rate limit exceeded.")
 

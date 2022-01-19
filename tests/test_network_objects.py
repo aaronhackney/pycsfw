@@ -91,7 +91,7 @@ class TestFMCNetworkObjects(common.TestCommon):
             self.assertTrue(False)
 
     def test_get_network_object(self) -> None:
-        objects = self.csfw_client.get_network_objects_list()
+        objects = self.csfw_client.get_network_objects_list(expanded=True)
         self.assertIsInstance(self.csfw_client.get_network_object(objects[0].id), NetworkObjectModel)
 
     def test_create_network_object(self) -> None:
@@ -114,7 +114,7 @@ class TestFMCNetworkObjects(common.TestCommon):
 
     def test_get_host_object_list(self) -> None:
         self.create_test_objects()
-        host_objs = self.csfw_client.get_host_objects_list()
+        host_objs = self.csfw_client.get_host_objects_list(expanded=True)
         if host_objs:
             for host_obj in host_objs:
                 self.assertIsInstance(host_obj, HostObjectModel)

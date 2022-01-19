@@ -52,6 +52,7 @@ class NetworkObjectModel(BaseModel):
     type: str = "Network"
     value: Optional[str]
     version: Optional[str]
+    paging: Optional[dict]
     overrideTargetId: Optional[str]
 
 
@@ -326,4 +327,5 @@ class NetworkGroupModel(BaseModel):
     overrides: Optional[dict]
     version: Optional[str]
     overrideTargetId: Optional[str]
+    paging: Optional[dict]
     type: str = "NetworkGroup"

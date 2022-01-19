@@ -1,7 +1,6 @@
 import os
 import json
 import logging
-import urllib3
 from pycsfw import CSFWClient
 
 log = logging.getLogger("CSFMC-Inventory")
@@ -15,14 +14,6 @@ def main(log_level=logging.warning):
     username = os.environ.get("CSFMCUSER")
     password = os.environ.get("CSFMCPASS")
     verify = os.environ.get("VERIFY")
-
-    if not verify:
-        log.warning(
-            "TLS Verification has been disabled. You should not do this in production. "
-            "We are disabling the TLS InsecureRequestWarning messages for the duration of this script"
-        )
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
     csfw_client = CSFWClient(csfmc_ip, username, password, verify=verify)
 
     # Get the domains avaiable on this Firewall Manager and the system version of this Firewall Manager
