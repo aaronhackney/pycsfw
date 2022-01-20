@@ -157,6 +157,8 @@ class BaseClient(object):
         Used to override the headers that will be sent with every API call to the CSFMC
         :param headers: dict of headers to send with each API call. Note that if a user supplies this variable,
                         they will also need "Content-Type" and "X-auth-access-token" headers in this dict
+        :return: dict of headers
+        :rtype: dict
         """
         if headers is None:
             if self.token is not None:
@@ -169,7 +171,7 @@ class BaseClient(object):
         else:
             return headers
 
-    def get_auth_token(self):
+    def get_auth_token(self) -> None:
         self.token = self.parse_auth_headers(self.post(f"{self.PLATFORM_PREFIX}/auth/generatetoken", auth=True))
 
     @HTTPWrapper()
@@ -263,7 +265,13 @@ class BaseClient(object):
         r = requests.delete(self.base_url + endpoint, headers=my_headers, verify=self.verify, timeout=self.timeout)
         return r
 
-    def parse_auth_headers(self, headers: dict):
+    def parse_auth_headers(self, headers: dict) -> dict:
+        """
+        When acquiring a token the token is returned in a response header. Parse the headers and get the tokens
+        :param headers: a dictionary of HTTP headers returned by the token get method
+        :return: dictionary of tokens and other auth data
+        :rtype: dict
+        """
         return {
             "USER_UUID": headers.get("USER_UUID"),
             "X-auth-access-token": headers.get("X-auth-access-token"),
@@ -274,7 +282,13 @@ class BaseClient(object):
             "DOMAINS": loads(headers.get("DOMAINS")),
         }
 
-    def _serialize_objects(self, obj_list: list) -> list:
+    def _serialize_objects(self, obj_list: list) -> list[dict]:
+        """
+        Given an object, strip out the ephemeral fields that cause 422 issues and return a dict version of the class
+        :param obj_list: list of objects to serialize
+        :return: list of dictionaries with problematic fields stripped out
+        :rtype: list
+        """
         serializable_objs = []
         for i, net_obj in enumerate(obj_list):
             obj_list[i].metadata = None

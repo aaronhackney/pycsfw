@@ -290,16 +290,12 @@ class NetworkObjects:
                 return_data.extend(net_objs["items"])
         return return_data
 
-    def _serialize_objects(self, obj_list: list) -> list:
-        serializable_objs = []
-        for i, net_obj in enumerate(obj_list):
-            obj_list[i].metadata = None
-            serializable_objs.append(obj_list[i].dict(exclude_unset=True))
-        return serializable_objs
-
-    def _minimize_objects(self, obj_list: list):
+    def _minimize_objects(self, obj_list: list) -> list[INetworkAddress]:
         """
         Given a list of objects, return a new list with just the objectId and the ObjectType
+        :param obj_list: List of network, host, or network group objects
+        :return: returns a list of INetworkAddress with just id and type
+        :rtype: list
         """
         minimized = list()
         [minimized.append(INetworkAddress(**{"id": obj.id, "type": obj.type})) for obj in obj_list]
