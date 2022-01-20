@@ -82,6 +82,28 @@ NET_GROUP_1 = NetworkGroupModel(
     }
 )
 
+NET_GROUP_2 = NetworkGroupModel(
+    **{
+        "name": "test-network-group-2",
+        "description": "Test network group number uno",
+        "literals": [
+            {"type": "Network", "value": "10.0.0.0/8"},
+            {"type": "Network", "value": "172.16.0.0/12"},
+            {"type": "Host", "value": "192.168.0.100"},
+        ],
+        "type": "NetworkGroup",
+    }
+)
+
+NET_GROUP_3 = NetworkGroupModel(
+    **{
+        "name": "test-network-group-3",
+        "description": "Test network group number uno",
+        "objects": None,
+        "type": "NetworkGroup",
+    }
+)
+
 TEST_ACCESS_POLICY = FTDAccessPolicyModel(
     **{
         "type": "AccessPolicy",

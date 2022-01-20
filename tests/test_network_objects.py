@@ -56,7 +56,7 @@ class TestFMCNetworkObjects(common.TestCommon):
         time.sleep(3)  # Give the maanger time to create the devices before we attempt to retrieve them....
 
     def delete_test_network_groups(self):
-        net_groups = self.csfw_client.get_network_groups_list(filter="nameOrValue:test-network-group-1", expanded=True)
+        net_groups = self.csfw_client.get_network_groups_list(filter="nameOrValue:test-network-group-", expanded=True)
         try:
             if net_groups:
                 for net_grp in net_groups:
@@ -165,6 +165,20 @@ class TestFMCNetworkObjects(common.TestCommon):
         network_grp.objects = self.csfw_client.create_bulk_network_objects([common.NET_OBJ_1, common.NET_OBJ_2])
         new_network_grp = self.csfw_client.create_network_group(network_grp)
         self.assertIsInstance(new_network_grp, NetworkGroupModel)
+
+    def test_create_network_group_literals(self):
+        network_grp = self.csfw_client.create_network_group(common.NET_GROUP_2)
+        self.assertIsInstance(network_grp, NetworkGroupModel)
+
+    def test_create_network_group_nested(self):
+        """Test creating a network group that contains a network group"""
+        network_grp_3_raw = common.NET_GROUP_3
+        network_grp_2 = self.csfw_client.create_network_group(common.NET_GROUP_2)
+        network_grp_3_raw.objects = self.csfw_client.create_bulk_network_objects([common.NET_OBJ_1, common.NET_OBJ_2])
+        network_grp_3_raw.objects.append(network_grp_2)
+        network_grp_3 = self.csfw_client.create_network_group(network_grp_3_raw)
+        self.assertIsInstance(network_grp_3, NetworkGroupModel)
+        self.csfw_client.delete_network_group(network_grp_3.id)
 
     def test_modify_network_group(self):
         self.create_test_network_group()

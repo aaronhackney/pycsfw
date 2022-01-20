@@ -1,10 +1,8 @@
 import logging
-from .models import HostObjectModel, NetworkObjectModel, NetworkGroupModel
+from .models import HostObjectModel, NetworkObjectModel, NetworkGroupModel, INetworkAddress
 from urllib.parse import urlparse, parse_qsl
 
 log = logging.getLogger(__name__)
-
-# TODO: refactor the get list method to return the entire payload not just items.
 
 
 class NetworkObjects:
@@ -26,7 +24,11 @@ class NetworkObjects:
             params={"offset": offset, "limit": limit, "expanded": expanded, "filter": filter},
         )
         if "items" in net_objs_list:
-            return [NetworkObjectModel(**net_obj) for net_obj in net_objs_list["items"]]
+            return_data = [NetworkObjectModel(**net_obj) for net_obj in net_objs_list["items"]]
+            if net_objs_list["paging"]["pages"] > 1:  # There could be many pages of data
+                paged_data = self._get_all_pages(net_objs_list["paging"])
+                return_data.extend([NetworkObjectModel(**net_obj) for net_obj in paged_data])
+            return return_data
 
     def get_network_object(self, net_obj_id: str, override_target_id: str = None) -> NetworkObjectModel:
         """
@@ -194,12 +196,16 @@ class NetworkObjects:
         :return: list of NetworkGroupModel objects (see models.py)
         :rtype: list[NetworkGroupModel]
         """  # /api/fmc_config/v1
-        network_grps = self.get(
+        network_grps_list = self.get(
             f"{self.CONFIG_PREFIX}/domain/{self.domain_uuid}/object/networkgroups",
             params={"offset": offset, "limit": limit, "expanded": expanded, "filter": filter},
         )
-        if "items" in network_grps:
-            return [NetworkGroupModel(**network_grp) for network_grp in network_grps["items"]]
+        if "items" in network_grps_list:
+            return_data = [NetworkGroupModel(**network_grp) for network_grp in network_grps_list["items"]]
+            if network_grps_list["paging"]["pages"] > 1:  # There could be many pages of data
+                paged_data = self._get_all_pages(network_grps_list["paging"])
+                return_data.extend([NetworkGroupModel(**net_grp) for net_grp in paged_data])
+            return return_data
 
     def get_network_group(self, network_group_id: str, override_target_id: str = None) -> NetworkGroupModel:
         """
@@ -222,7 +228,8 @@ class NetworkObjects:
         :rtype: NetworkGroupModel
         """
         # For network groups we only need the object ID and type. Minimize those objects to bare essentials.
-        network_grp.objects = self._minimize_objects(network_grp.objects)
+        if network_grp.objects:
+            network_grp.objects = self._minimize_objects(network_grp.objects)
 
         return NetworkGroupModel(
             **self.post(
@@ -263,20 +270,20 @@ class NetworkObjects:
         """
         Given returned dataset paging information, extract the remaining pages of data from the API
         :param paging: The paging data returned by the CSFMC API
-        :return: a list of network objects
+        :return: a list of network objects (Could be HostObjectModel, NetworkObjectModel, NetworkGroupModel
         :rtype: list
         """
         return_data = []
         for api_call in paging["next"]:
-            url_parts = urlparse(api_call)
-            query_parts = dict(parse_qsl(url_parts.query))
+            url_p = urlparse(api_call)
+            query_p = dict(parse_qsl(url_p.query))
             net_objs = self.get(
-                f"{url_parts.path}",
+                f"{url_p.path}",
                 params={
-                    "offset": query_parts.get("offset", None),
-                    "limit": query_parts.get("limit", None),
-                    "expanded": query_parts.get("expanded", None),
-                    "filter": query_parts.get("filter", None),
+                    "offset": query_p.get("offset"),
+                    "limit": query_p.get("limit"),
+                    "expanded": query_p.get("expanded"),
+                    "filter": query_p.get("filter"),
                 },
             )
             if "items" in net_objs:
@@ -295,8 +302,5 @@ class NetworkObjects:
         Given a list of objects, return a new list with just the objectId and the ObjectType
         """
         minimized = list()
-        [minimized.append({"id": obj.id, "type": obj.type}) for obj in obj_list]
+        [minimized.append(INetworkAddress(**{"id": obj.id, "type": obj.type})) for obj in obj_list]
         return minimized
-
-
-# TODO: Deal with nested groups...
